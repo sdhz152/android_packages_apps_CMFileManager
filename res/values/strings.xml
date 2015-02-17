@@ -844,4 +844,5 @@
     <string name="easy_mode_type_music">Music</string>
     <string name="easy_mode_type_documents">Documents</string>
 
+    <string name="no_permission_for_drm">"Sorry, DRM file cannot be shared"</string>
 </resources>
