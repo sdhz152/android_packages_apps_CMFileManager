@@ -118,40 +118,35 @@ public final class IntentsActionPolicy extends ActionsPolicy {
 
             // Obtain the mime/type and passed it to intent
             String mime = MimeTypeHelper.getMimeType(ctx, fso);
-            if (mime == null) {
-                String ext = FileHelper.getExtension(fso);
-                if (ext != null
-                        && (ext.equalsIgnoreCase("dm") || ext
-                                .equalsIgnoreCase("dcf"))) {
-                    int status = -1;
-                    String path = fso.getFullPath();
-                    path = path.replace("/storage/emulated/0",
-                            "/storage/emulated/legacy");
-                    DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
-                            ctx);
-                    try {
-                        mime = drmClient.getOriginalMimeType(path);
-                        if (mime.startsWith("image")) {
-                            status = drmClient.checkRightsStatus(path,
-                                    Action.DISPLAY);
-                        } else {
-                            status = drmClient.checkRightsStatus(path,
-                                    Action.PLAY);
-                        }
-                        if (RightsStatus.RIGHTS_VALID != status) {
-                            ContentValues values = drmClient.getMetadata(path);
-                            String address = values
-                                    .getAsString("Rights-Issuer");
-                            Intent drmIntent = new Intent(BUY_LICENSE);
-                            drmIntent.putExtra("DRM_FILE_PATH", address);
-                            ctx.sendBroadcast(drmIntent);
-                            Log.e(TAG,
-                                    "Drm License expared! can not proceed ahead");
-                            return;
-                        }
-                    } finally {
-                        drmClient.release();
+            String ext = FileHelper.getExtension(fso);
+            if (ext != null
+                    && (ext.equalsIgnoreCase("dm") || ext
+                            .equalsIgnoreCase("dcf"))) {
+                int status = -1;
+                String path = fso.getFullPath();
+                path = path.replace("/storage/emulated/0",
+                        "/storage/emulated/legacy");
+                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
+                        ctx);
+                try {
+                    mime = drmClient.getOriginalMimeType(path);
+                    if (mime.startsWith("image")) {
+                        status = drmClient.checkRightsStatus(path,
+                                Action.DISPLAY);
+                    } else {
+                        status = drmClient.checkRightsStatus(path, Action.PLAY);
                     }
+                    if (RightsStatus.RIGHTS_VALID != status) {
+                        ContentValues values = drmClient.getMetadata(path);
+                        String address = values.getAsString("Rights-Issuer");
+                        Intent drmIntent = new Intent(BUY_LICENSE);
+                        drmIntent.putExtra("DRM_FILE_PATH", address);
+                        ctx.sendBroadcast(drmIntent);
+                        Log.e(TAG, "Drm License expared! can not proceed ahead");
+                        return;
+                    }
+                } finally {
+                    drmClient.release();
                 }
             }
             if (mime != null) {
