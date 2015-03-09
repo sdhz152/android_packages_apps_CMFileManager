@@ -158,6 +158,10 @@
       android:id="@+id/mnu_actions_set_as_home"
       android:showAsAction="ifRoom"
       android:title="@string/actions_menu_set_as_home"/>
+    <item
+      android:id="@+id/mnu_actions_drm_license_info"
+      android:showAsAction="ifRoom"
+      android:title="@string/actions_menu_drm_license_info"/>
   </group>
 
 </menu>
