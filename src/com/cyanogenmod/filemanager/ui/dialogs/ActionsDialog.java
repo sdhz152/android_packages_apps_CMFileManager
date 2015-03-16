@@ -19,6 +19,8 @@ package com.cyanogenmod.filemanager.ui.dialogs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -309,6 +311,24 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                 if (this.mOnSelectionListener != null) {
                     List<FileSystemObject> selection =
                             this.mOnSelectionListener.onRequestSelectedFiles();
+
+                    // Check whether DRM files are selected for share.
+                    boolean isDrm = false;
+                    for (FileSystemObject fso : selection) {
+                        String ext = FileHelper.getExtension(fso);
+                        isDrm = ext != null && (ext.equalsIgnoreCase("dm"));
+                        if (isDrm) {
+                            break;
+                        }
+                    }
+                    if (isDrm) {
+                        // Drm files shold not share
+                        Toast.makeText(this.mContext,
+                                R.string.no_permission_for_drm, Toast.LENGTH_SHORT)
+                                .show();
+                        break;
+                    }
+
                     if (selection.size() == 1) {
                         IntentsActionPolicy.sendFileSystemObject(
                                 this.mContext, selection.get(0), null, null);
