@@ -476,6 +476,18 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                 }
                 break;
 
+            // DRM License information
+            case R.id.mnu_actions_drm_license_info:
+                String path = this.mFso.getFullPath();
+                path = path.replace("/storage/emulated/0",
+                        "/storage/emulated/legacy");
+                Intent intent = new Intent(
+                        "android.drmservice.intent.action.SHOW_PROPERTIES");
+                intent.putExtra("DRM_FILE_PATH", path);
+                intent.putExtra("DRM_TYPE", "OMAV1");
+                this.mContext.sendBroadcast(intent);
+                break;
+
             default:
                 break;
         }
@@ -692,6 +704,15 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
             //- Print (only for text and image categories)
             if (!PrintActionPolicy.isPrintedAllowed(mContext, mFso)) {
                 menu.removeItem(R.id.mnu_actions_print);
+            }
+
+            // - Show this option only on DRM files for DRM license information
+            String ext = FileHelper.getExtension(this.mFso);
+            boolean isDrm = ext != null
+                    && (ext.equalsIgnoreCase("dm") || ext
+                            .equalsIgnoreCase("dcf"));
+            if (!isDrm) {
+                menu.removeItem(R.id.mnu_actions_drm_license_info);
             }
         }
 
