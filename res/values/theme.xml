@@ -203,6 +203,7 @@
     <drawable name="fso_type_system_drawable">@drawable/fso_type_system</drawable>
     <drawable name="fso_type_text_drawable">@drawable/fso_type_text</drawable>
     <drawable name="fso_type_video_drawable">@drawable/fso_type_video</drawable>
+    <drawable name="fso_type_drm_drawable">@drawable/fso_type_drm</drawable>
 
     <!-- Overlay -->
     <drawable name="ic_overlay_secure_drawable">@drawable/ic_overlay_secure</drawable>

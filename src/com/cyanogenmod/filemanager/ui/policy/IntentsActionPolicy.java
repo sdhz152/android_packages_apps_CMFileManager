@@ -18,6 +18,7 @@ package com.cyanogenmod.filemanager.ui.policy;
 
 import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
@@ -25,9 +26,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.drm.DrmManagerClientWrapper;
+import android.drm.DrmStore.Action;
+import android.drm.DrmStore.RightsStatus;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -89,6 +94,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
     public static final String GALLERY2_PACKAGE = "com.android.gallery3d";
 
     /**
+     * DRM related action to BUY_LICENSE
+     */
+    public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
+
+    /**
      * Method that opens a {@link FileSystemObject} with the default registered application
      * by the system, or ask the user for select a registered application.
      *
@@ -108,6 +118,37 @@ public final class IntentsActionPolicy extends ActionsPolicy {
 
             // Obtain the mime/type and passed it to intent
             String mime = MimeTypeHelper.getMimeType(ctx, fso);
+            String ext = FileHelper.getExtension(fso);
+            if (ext != null
+                    && (ext.equalsIgnoreCase("dm") || ext
+                            .equalsIgnoreCase("dcf"))) {
+                int status = -1;
+                String path = fso.getFullPath();
+                path = path.replace("/storage/emulated/0",
+                        "/storage/emulated/legacy");
+                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
+                        ctx);
+                try {
+                    mime = drmClient.getOriginalMimeType(path);
+                    if (mime.startsWith("image")) {
+                        status = drmClient.checkRightsStatus(path,
+                                Action.DISPLAY);
+                    } else {
+                        status = drmClient.checkRightsStatus(path, Action.PLAY);
+                    }
+                    if (RightsStatus.RIGHTS_VALID != status) {
+                        ContentValues values = drmClient.getMetadata(path);
+                        String address = values.getAsString("Rights-Issuer");
+                        Intent drmIntent = new Intent(BUY_LICENSE);
+                        drmIntent.putExtra("DRM_FILE_PATH", address);
+                        ctx.sendBroadcast(drmIntent);
+                        Log.e(TAG, "Drm License expared! can not proceed ahead");
+                        return;
+                    }
+                } finally {
+                    drmClient.release();
+                }
+            }
             if (mime != null) {
                 intent.setDataAndType(getUriFromFile(ctx, fso), mime);
             } else {
@@ -143,11 +184,34 @@ public final class IntentsActionPolicy extends ActionsPolicy {
             final Context ctx, final FileSystemObject fso,
             OnCancelListener onCancelListener, OnDismissListener onDismissListener) {
         try {
+            String mime = MimeTypeHelper.getMimeType(ctx, fso);
+            String ext = FileHelper.getExtension(fso);
+            if (ext != null && ext.equalsIgnoreCase("dm")
+                    || ext.equalsIgnoreCase("dcf")) {
+                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
+                        ctx);
+                try {
+                    if (ext.equalsIgnoreCase("dcf")) {
+                        String path = fso.getFullPath();
+                        path = path.replace("/storage/emulated/0",
+                                "/storage/emulated/legacy");
+
+                        mime = drmClient.getOriginalMimeType(path);
+                    } else {
+                        Log.i(TAG, "Drm file can not be share");
+                        Toast.makeText(ctx, R.string.no_permission_for_drm,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                } finally {
+                    drmClient.release();
+                }
+            }
             // Create the intent to
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setType(MimeTypeHelper.getMimeType(ctx, fso));
+            intent.setType(mime);
             Uri uri = getUriFromFile(ctx, fso);
             intent.putExtra(Intent.EXTRA_STREAM, uri);
 
