@@ -111,7 +111,11 @@ public final class MimeTypeHelper {
         /**
          * Security file (certificate, keys, ...)
          */
-        SECURITY;
+        SECURITY,
+        /**
+         * DRM Files
+         */
+        DRM;
 
         public static String[] names() {
             MimeTypeCategory[] categories = values();

@@ -19,6 +19,8 @@ package com.cyanogenmod.filemanager.ui.dialogs;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -309,6 +311,24 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                 if (this.mOnSelectionListener != null) {
                     List<FileSystemObject> selection =
                             this.mOnSelectionListener.onRequestSelectedFiles();
+
+                    // Check whether DRM files are selected for share.
+                    boolean isDrm = false;
+                    for (FileSystemObject fso : selection) {
+                        String ext = FileHelper.getExtension(fso);
+                        isDrm = ext != null && (ext.equalsIgnoreCase("dm"));
+                        if (isDrm) {
+                            break;
+                        }
+                    }
+                    if (isDrm) {
+                        // Drm files shold not share
+                        Toast.makeText(this.mContext,
+                                R.string.no_permission_for_drm, Toast.LENGTH_SHORT)
+                                .show();
+                        break;
+                    }
+
                     if (selection.size() == 1) {
                         IntentsActionPolicy.sendFileSystemObject(
                                 this.mContext, selection.get(0), null, null);
@@ -454,6 +474,18 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                 } catch (InvalidClassException e) {
                     ExceptionUtil.translateException(mContext, e);
                 }
+                break;
+
+            // DRM License information
+            case R.id.mnu_actions_drm_license_info:
+                String path = this.mFso.getFullPath();
+                path = path.replace("/storage/emulated/0",
+                        "/storage/emulated/legacy");
+                Intent intent = new Intent(
+                        "android.drmservice.intent.action.SHOW_PROPERTIES");
+                intent.putExtra("DRM_FILE_PATH", path);
+                intent.putExtra("DRM_TYPE", "OMAV1");
+                this.mContext.sendBroadcast(intent);
                 break;
 
             default:
@@ -672,6 +704,15 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
             //- Print (only for text and image categories)
             if (!PrintActionPolicy.isPrintedAllowed(mContext, mFso)) {
                 menu.removeItem(R.id.mnu_actions_print);
+            }
+
+            // - Show this option only on DRM files for DRM license information
+            String ext = FileHelper.getExtension(this.mFso);
+            boolean isDrm = ext != null
+                    && (ext.equalsIgnoreCase("dm") || ext
+                            .equalsIgnoreCase("dcf"));
+            if (!isDrm) {
+                menu.removeItem(R.id.mnu_actions_drm_license_info);
             }
         }
 
