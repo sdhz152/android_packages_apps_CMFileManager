@@ -1292,7 +1292,8 @@ public class EditorActivity extends Activity implements TextWatcher {
                         };
 
                         // Execute the command (read the file)
-                        CommandHelper.read(activity, fso.getFullPath(), this.mReader, null);
+                        CommandHelper.read(activity, fso.getFullPath(), this.mReader,
+                                           null);
 
                         // Wait for
                         synchronized (this.mReader.mSync) {
