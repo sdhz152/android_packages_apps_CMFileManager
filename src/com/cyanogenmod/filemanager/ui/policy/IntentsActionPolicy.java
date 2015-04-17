@@ -808,7 +808,8 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         // Try to resolve media data or return a file uri
         final File file = new File(fso.getFullPath());
         Uri uri = MediaHelper.fileToContentUri(ctx, file);
-        if (uri == null) {
+        if (uri == null || MimeTypeHelper.getCategoryFromExt(
+                ctx,FileHelper.getExtension(fso), fso.getFullPath())== MimeTypeCategory.AUDIO) {
             uri = Uri.fromFile(file);
         }
         return uri;
