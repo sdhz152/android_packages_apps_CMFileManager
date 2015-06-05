@@ -25,7 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.drm.DrmManagerClientWrapper;
+import android.drm.OmaDrmHelper;
 import android.drm.DrmStore.Action;
 import android.drm.DrmStore.RightsStatus;
 import android.net.Uri;
@@ -176,37 +176,22 @@ public final class IntentsActionPolicy extends ActionsPolicy {
 
             // Obtain the mime/type and passed it to intent
             String mime = MimeTypeHelper.getMimeType(ctx, fso);
-            String ext = FileHelper.getExtension(fso);
-            if (ext != null
-                    && (ext.equalsIgnoreCase("dm") || ext
-                            .equalsIgnoreCase("dcf"))) {
-                int status = -1;
-                String path = fso.getFullPath();
-                path = path.replace("/storage/emulated/0",
-                        "/storage/emulated/legacy");
-                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
-                        ctx);
-                try {
-                    mime = drmClient.getOriginalMimeType(path);
-                    if (mime.startsWith("image")) {
-                        status = drmClient.checkRightsStatus(path,
-                                Action.DISPLAY);
-                    } else {
-                        status = drmClient.checkRightsStatus(path, Action.PLAY);
+
+            if (OmaDrmHelper.isDrmFile(fso.getFullPath())) {
+                mime = OmaDrmHelper.getOriginalMimeType(ctx, fso.getFullPath());
+                if (!OmaDrmHelper.validateLicense(ctx, fso.getFullPath(), mime)) {
+                    Log.e(TAG, "Drm License expared! can not proceed ahead");
+                    return;
+                }
+                if (!TextUtils.isEmpty(mime)) {
+                    if (mime.startsWith("image/") || mime.startsWith("video/")) {
+                        intent.setPackage("com.android.gallery3d");
+                    } else if (mime.startsWith("audio/")) {
+                        intent.setClassName("com.android.music", "com.android.music.AudioPreview");
                     }
-                    if (RightsStatus.RIGHTS_VALID != status) {
-                        ContentValues values = drmClient.getMetadata(path);
-                        String address = values.getAsString("Rights-Issuer");
-                        Intent drmIntent = new Intent(BUY_LICENSE);
-                        drmIntent.putExtra("DRM_FILE_PATH", address);
-                        ctx.sendBroadcast(drmIntent);
-                        Log.e(TAG, "Drm License expared! can not proceed ahead");
-                        return;
-                    }
-                } finally {
-                    drmClient.release();
                 }
             }
+
             if (mime != null) {
                 intent.setDataAndType(getUriFromFile(ctx, fso), mime);
             } else {
@@ -243,28 +228,19 @@ public final class IntentsActionPolicy extends ActionsPolicy {
             OnCancelListener onCancelListener, OnDismissListener onDismissListener) {
         try {
             String mime = MimeTypeHelper.getMimeType(ctx, fso);
-            String ext = FileHelper.getExtension(fso);
-            if (ext != null && ext.equalsIgnoreCase("dm")
-                    || ext.equalsIgnoreCase("dcf")) {
-                DrmManagerClientWrapper drmClient = new DrmManagerClientWrapper(
-                        ctx);
-                try {
-                    if (ext.equalsIgnoreCase("dcf")) {
-                        String path = fso.getFullPath();
-                        path = path.replace("/storage/emulated/0",
-                                "/storage/emulated/legacy");
 
-                        mime = drmClient.getOriginalMimeType(path);
-                    } else {
-                        Log.i(TAG, "Drm file can not be share");
-                        Toast.makeText(ctx, R.string.no_permission_for_drm,
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                } finally {
-                    drmClient.release();
+            if (OmaDrmHelper.isDrmFile(fso.getFullPath())) {
+                if (OmaDrmHelper.isShareableDrmFile(fso.getFullPath())) {
+                    mime = OmaDrmHelper
+                            .getOriginalMimeType(ctx, fso.getFullPath());
+                } else {
+                    Log.i(TAG, "Drm file can not be share");
+                    Toast.makeText(ctx, R.string.no_permission_for_drm,
+                            Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
+
             // Create the intent to
             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_SEND);
