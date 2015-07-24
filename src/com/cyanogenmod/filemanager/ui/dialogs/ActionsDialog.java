@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.drm.OmaDrmHelper;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
@@ -312,21 +313,16 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                     List<FileSystemObject> selection =
                             this.mOnSelectionListener.onRequestSelectedFiles();
 
-                    // Check whether DRM files are selected for share.
-                    boolean isDrm = false;
-                    for (FileSystemObject fso : selection) {
-                        String ext = FileHelper.getExtension(fso);
-                        isDrm = ext != null && (ext.equalsIgnoreCase("dm"));
-                        if (isDrm) {
-                            break;
+                    if (OmaDrmHelper.isOmaDrmEnabled()) {
+                        for (FileSystemObject fso : selection) {
+                            if (!OmaDrmHelper.isShareableDrmFile(fso.getFullPath())) {
+                                // DRM FL/CD files cannot be shared
+                                Toast.makeText(this.mContext,
+                                        R.string.no_permission_for_drm,
+                                        Toast.LENGTH_SHORT).show();
+                                break;
+                            }
                         }
-                    }
-                    if (isDrm) {
-                        // Drm files shold not share
-                        Toast.makeText(this.mContext,
-                                R.string.no_permission_for_drm, Toast.LENGTH_SHORT)
-                                .show();
-                        break;
                     }
 
                     if (selection.size() == 1) {
@@ -707,11 +703,7 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
             }
 
             // - Show this option only on DRM files for DRM license information
-            String ext = FileHelper.getExtension(this.mFso);
-            boolean isDrm = ext != null
-                    && (ext.equalsIgnoreCase("dm") || ext
-                            .equalsIgnoreCase("dcf"));
-            if (!isDrm) {
+            if (!OmaDrmHelper.isDrmFile( this.mFso.getFullPath())) {
                 menu.removeItem(R.id.mnu_actions_drm_license_info);
             }
         }
