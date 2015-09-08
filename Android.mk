@@ -27,6 +27,7 @@ LOCAL_AAPT_FLAGS := --auto-add-overlay
 LOCAL_STATIC_JAVA_LIBRARIES += libtruezip
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v4
 LOCAL_STATIC_JAVA_LIBRARIES += juniversalchardet
+LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
 
 LOCAL_RESOURCE_DIR += $(addprefix $(LOCAL_PATH)/, themes/res res)
 
