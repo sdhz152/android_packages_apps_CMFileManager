@@ -29,7 +29,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.drm.OmaDrmHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -549,17 +548,6 @@ public class PickerActivity extends Activity
      */
     @Override
     public void onFilePicked(FileSystemObject item) {
-        if (item != null) {
-            boolean canShare = OmaDrmHelper.isShareableDrmFile(OmaDrmHelper
-                    .getFilePath(this, Uri.parse(item.getFullPath())));
-            if (!canShare) {
-                // Drm FL/CD files should not be shared
-                Toast.makeText(this, R.string.no_permission_for_drm,
-                        Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-
         this.mFso = item;
         this.mDialog.dismiss();
     }
