@@ -72,7 +72,6 @@ import com.cyanogenmod.filemanager.console.NoSuchFileOrDirectory;
 import com.cyanogenmod.filemanager.console.OperationTimeoutException;
 import com.cyanogenmod.filemanager.console.ReadOnlyFilesystemException;
 import com.cyanogenmod.filemanager.console.VirtualMountPointConsole;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.model.Directory;
 import com.cyanogenmod.filemanager.model.DiskUsage;
 import com.cyanogenmod.filemanager.model.FileSystemObject;
@@ -1298,36 +1297,12 @@ public final class CommandHelper {
             throws FileNotFoundException, IOException, ConsoleAllocException,
             NoSuchFileOrDirectory, InsufficientPermissionsException,
             CommandNotFoundException, OperationTimeoutException,
-            ExecutionException, InvalidCommandDefinitionException, CancelledOperationException {
-        boolean ret = false;
-        if (mp.isSecure()) {
-            // Unmount the secure file system
-            SecureConsole sc = (SecureConsole) ensureConsoleForFile(
-                    context, console, mp.getMountPoint());
-            if (rw) {
-                sc.mount(context);
-            } else {
-                sc.unmount();
-            }
-            ret = true;
-        } else {
-            Console c = ensureConsole(context, console);
-            MountExecutable executable =
-                    c.getExecutableFactory().newCreator().createMountExecutable(mp, rw);
-            execute(context, executable, c);
-            ret = executable.getResult().booleanValue();
-        }
-
-        if (ret) {
-            // Send an broadcast to notify that the mount state of this filesystem changed
-            Intent intent = new Intent(FileManagerSettings.INTENT_MOUNT_STATUS_CHANGED);
-            intent.putExtra(FileManagerSettings.EXTRA_MOUNTPOINT, mp.getMountPoint());
-            intent.putExtra(FileManagerSettings.EXTRA_STATUS, rw
-                    ? MountExecutable.READWRITE : MountExecutable.READONLY);
-            context.sendBroadcast(intent);
-        }
-
-        return ret;
+                      ExecutionException, InvalidCommandDefinitionException {
+        Console c = ensureConsole(context, console);
+        MountExecutable executable =
+                c.getExecutableFactory().newCreator().createMountExecutable(mp, rw);
+        execute(context, executable, c);
+        return executable.getResult().booleanValue();
     }
 
     /**

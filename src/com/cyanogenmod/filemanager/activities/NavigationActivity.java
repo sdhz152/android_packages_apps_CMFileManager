@@ -76,7 +76,6 @@ import com.cyanogenmod.filemanager.console.InsufficientPermissionsException;
 import com.cyanogenmod.filemanager.console.NoSuchFileOrDirectory;
 import com.cyanogenmod.filemanager.console.VirtualConsole;
 import com.cyanogenmod.filemanager.console.VirtualMountPointConsole;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.listeners.OnHistoryListener;
 import com.cyanogenmod.filemanager.listeners.OnRequestRefreshListener;
 import com.cyanogenmod.filemanager.model.Bookmark;
@@ -1234,7 +1233,6 @@ public class NavigationActivity extends Activity
         }
         mSdBookmarks = loadSdStorageBookmarks();
         bookmarks.addAll(mSdBookmarks);
-        bookmarks.addAll(loadVirtualBookmarks());
         bookmarks.addAll(loadUserBookmarks());
         return bookmarks;
     }
@@ -1374,31 +1372,6 @@ public class NavigationActivity extends Activity
         return new ArrayList<Bookmark>();
     }
 
-    /**
-     * Method that loads all virtual mount points.
-     *
-     * @return List<Bookmark> The bookmarks loaded
-     */
-    private List<Bookmark> loadVirtualBookmarks() {
-        // Initialize the bookmarks
-        List<Bookmark> bookmarks = new ArrayList<Bookmark>();
-        List<MountPoint> mps = VirtualMountPointConsole.getVirtualMountPoints();
-        for (MountPoint mp : mps) {
-            BOOKMARK_TYPE type = null;
-            String name = null;
-            if (mp.isSecure()) {
-                type = BOOKMARK_TYPE.SECURE;
-                name = getString(R.string.bookmarks_secure);
-            } else if (mp.isRemote()) {
-                type = BOOKMARK_TYPE.REMOTE;
-                name = getString(R.string.bookmarks_remote);
-            } else {
-                continue;
-            }
-            bookmarks.add(new Bookmark(type, name, mp.getMountPoint()));
-        }
-        return bookmarks;
-    }
 
     /**
      * Method that loads the user bookmarks (added by the user).
@@ -1584,14 +1557,6 @@ public class NavigationActivity extends Activity
             initialDir = navigateTo;
         }
 
-        // Add to history
-        final boolean addToHistory = intent.getBooleanExtra(EXTRA_ADD_TO_HISTORY, true);
-
-        // We cannot navigate to a secure console if is unmount, go to root in that case
-        VirtualConsole vc = VirtualMountPointConsole.getVirtualConsoleForPath(initialDir);
-        if (vc != null && vc instanceof SecureConsole && !((SecureConsole) vc).isMounted()) {
-            initialDir = FileHelper.ROOT_DIRECTORY;
-        }
 
         if (this.mChRooted) {
             // Initial directory is the first external sdcard (sdcard, emmc, usb, ...)
@@ -1627,19 +1592,17 @@ public class NavigationActivity extends Activity
                             this, ipex, false, true, new OnRelaunchCommandResult() {
                         @Override
                         public void onSuccess() {
-                            navigationView.changeCurrentDir(absInitialDir, addToHistory);
+                            navigationView.changeCurrentDir(absInitialDir);
                         }
                         @Override
                         public void onFailed(Throwable cause) {
                             showInitialInvalidDirectoryMsg(userInitialDir);
-                            navigationView.changeCurrentDir(FileHelper.ROOT_DIRECTORY,
-                                    addToHistory);
+                            navigationView.changeCurrentDir(FileHelper.ROOT_DIRECTORY);
                         }
                         @Override
                         public void onCancelled() {
                             showInitialInvalidDirectoryMsg(userInitialDir);
-                            navigationView.changeCurrentDir(FileHelper.ROOT_DIRECTORY,
-                                    addToHistory);
+                            navigationView.changeCurrentDir(FileHelper.ROOT_DIRECTORY);
                         }
                     });
 
@@ -1679,7 +1642,7 @@ public class NavigationActivity extends Activity
             performHideEasyMode();
         }
         // Change the current directory to the user-defined initial directory
-        navigationView.changeCurrentDir(initialDir, addToHistory);
+        navigationView.changeCurrentDir(initialDir);
     }
 
     /**

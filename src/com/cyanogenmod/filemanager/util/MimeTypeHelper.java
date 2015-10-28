@@ -22,7 +22,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.cyanogenmod.filemanager.R;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.model.BlockDevice;
 import com.cyanogenmod.filemanager.model.CharacterDevice;
 import com.cyanogenmod.filemanager.model.Directory;
@@ -285,11 +284,6 @@ public final class MimeTypeHelper {
 
         //Check if the argument is a folder
         if (fso instanceof Directory) {
-            if (fso.isSecure() && SecureConsole.isSecureStorageDir(fso.getFullPath())) {
-                return "fso_folder_secure"; //$NON-NLS-1$
-            } else if (fso.isRemote()) {
-                return "fso_folder_remote"; //$NON-NLS-1$
-            }
             return "ic_fso_folder_drawable"; //$NON-NLS-1$
         }
 

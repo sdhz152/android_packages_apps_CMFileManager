@@ -24,7 +24,6 @@ LOCAL_SRC_FILES += $(call all-java-files-under, libs/color-picker-view/src)
 
 LOCAL_AAPT_FLAGS := --auto-add-overlay
 
-LOCAL_STATIC_JAVA_LIBRARIES += libtruezip
 LOCAL_STATIC_JAVA_LIBRARIES += android-support-v4
 LOCAL_STATIC_JAVA_LIBRARIES += juniversalchardet
 LOCAL_JAVA_LIBRARIES += org.apache.http.legacy
