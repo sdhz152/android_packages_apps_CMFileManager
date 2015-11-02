@@ -22,7 +22,6 @@ import android.os.SystemClock;
 
 import com.cyanogenmod.filemanager.FileManagerApplication;
 import com.cyanogenmod.filemanager.R;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.model.Directory;
 import com.cyanogenmod.filemanager.model.DiskUsage;
 import com.cyanogenmod.filemanager.model.Identity;
@@ -127,7 +126,6 @@ public abstract class VirtualMountPointConsole extends VirtualConsole {
         int bufferSize = context.getResources().getInteger(R.integer.buffer_size);
 
         // Register every known virtual mountable console
-        sVirtualConsoles.add(SecureConsole.getInstance(context, bufferSize));
         // TODO Add remote consoles. Not ready for now.
         // sVirtualConsoles.add(new RemoteConsole(context));
     }

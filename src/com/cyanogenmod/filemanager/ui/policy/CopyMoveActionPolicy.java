@@ -26,7 +26,6 @@ import com.cyanogenmod.filemanager.R;
 import com.cyanogenmod.filemanager.console.Console;
 import com.cyanogenmod.filemanager.console.NoSuchFileOrDirectory;
 import com.cyanogenmod.filemanager.console.RelaunchableException;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.listeners.OnRequestRefreshListener;
 import com.cyanogenmod.filemanager.listeners.OnSelectionListener;
 import com.cyanogenmod.filemanager.model.FileSystemObject;
@@ -283,8 +282,7 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
             }
             @Override
             public boolean isDialogCancellable() {
-                return !(mSrcConsole instanceof SecureConsole)
-                        && !(mDstConsole instanceof SecureConsole);
+               return false;
             }
 
             @Override

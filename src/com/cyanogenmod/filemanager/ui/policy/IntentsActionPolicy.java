@@ -19,6 +19,7 @@ package com.cyanogenmod.filemanager.ui.policy;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -33,7 +34,6 @@ import android.util.Log;
 import android.widget.Toast;
 import com.cyanogenmod.filemanager.R;
 import com.cyanogenmod.filemanager.activities.ShortcutActivity;
-import com.cyanogenmod.filemanager.console.secure.SecureConsole;
 import com.cyanogenmod.filemanager.model.FileSystemObject;
 import com.cyanogenmod.filemanager.model.RegularFile;
 import com.cyanogenmod.filemanager.providers.SecureResourceProvider;
@@ -108,77 +108,21 @@ public final class IntentsActionPolicy extends ActionsPolicy {
      */
     public static void openFileSystemObject(
             final Context ctx, final FileSystemObject fso, final boolean choose,
-            final OnCancelListener onCancelListener, final OnDismissListener onDismissListener) {
+             OnCancelListener onCancelListener,  OnDismissListener onDismissListener) {
         try {
             // Create the intent to open the file
-            final Intent intent = new Intent();
+             Intent intent = new Intent();
             intent.setAction(android.content.Intent.ACTION_VIEW);
 
-            // [NOTE][MSB]: Short circuit to pop up dialog informing user we need to copy out the
-            // file until we find a better solution.
-            if (fso.isSecure()) {
-                // [TODO][MSB]: Check visible cache for existing file but I need to split up
-                // resolveIntent function properly for this to be successful
-                DialogHelper.createTwoButtonsQuestionDialog(
-                        ctx,
-                        R.string.ok,
-                        R.string.cancel,
-                        R.string.warning_title,
-                        ctx.getResources().getString(R.string.secure_storage_open_file_warning),
-                        new SecureChoiceClickListener(ctx, fso,
-                                new ISecureChoiceCompleteListener() {
-                                    private boolean isCancelled = false;
-                                    @Override
-                                    public void onComplete(File cacheFile) {
-                                        if (isCancelled) {
-                                            return;
-                                        }
-                                        // Schedule cleanup alarm
-                                        SecureCacheCleanupService.scheduleCleanup(ctx);
-
-                                        FileSystemObject cacheFso = FileHelper
-                                                .createFileSystemObject(cacheFile);
-                                        // Obtain the mime/type and passed it to intent
-                                        String mime = MimeTypeHelper.getMimeType(ctx, cacheFso);
-                                        if (mime != null) {
-                                            intent.setDataAndType(getUriFromFile(ctx, cacheFso),
-                                                    mime);
-                                        } else {
-                                            intent.setData(getUriFromFile(ctx, cacheFso));
-                                        }
-                                        // Resolve the intent
-                                        resolveIntent(
-                                                ctx,
-                                                intent,
-                                                choose,
-                                                createInternalIntents(ctx, cacheFso),
-                                                0,
-                                                R.string.associations_dialog_openwith_title,
-                                                R.string.associations_dialog_openwith_action,
-                                                true,
-                                                onCancelListener,
-                                                onDismissListener);
-                                    }
-
-                                    @Override
-                                    public void onCancelled() {
-                                        isCancelled = true;
-                                        Toast.makeText(ctx, R.string.cancelled_message, Toast
-                                                .LENGTH_SHORT).show();
-                                    }
-                                }))
-                        .show();
-                return;
-            }
 
             // Obtain the mime/type and passed it to intent
             String mime = MimeTypeHelper.getMimeType(ctx, fso);
             String ext = FileHelper.getExtension(fso);
-            
+            File file = new File(fso.getFullPath());
             if (mime != null) {
-                intent.setDataAndType(getUriFromFile(ctx, fso), mime);
+               intent.setDataAndType(getUriFromFile(ctx, file), mime);
             } else {
-                intent.setData(getUriFromFile(ctx, fso));
+               intent.setData(getUriFromFile(ctx, file));
             }
 
             // Resolve the intent
@@ -218,7 +162,7 @@ public final class IntentsActionPolicy extends ActionsPolicy {
             intent.setAction(android.content.Intent.ACTION_SEND);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setType(mime);
-            Uri uri = getUriFromFile(ctx, fso);
+            Uri uri = getUriFromFile(ctx, new File(fso.getFullPath()));;
             intent.putExtra(Intent.EXTRA_STREAM, uri);
 
             // Resolve the intent
@@ -279,7 +223,7 @@ public final class IntentsActionPolicy extends ActionsPolicy {
                 lastMimeType = mimeType;
 
                 // Add the uri
-                uris.add(getUriFromFile(ctx, fso));
+                uris.add(getUriFromFile(ctx, new File(fso.getFullPath())));
             }
             if (sameMimeType) {
                 intent.setType(lastMimeType);
@@ -744,20 +688,9 @@ public final class IntentsActionPolicy extends ActionsPolicy {
      * @param ctx The current context
      * @param file The file to resolve
      */
-    private static Uri getUriFromFile(Context ctx, FileSystemObject fso) {
-        // If the passed object is secure file then we have to provide access with
-        // the internal resource provider
-        if (fso.isSecure() && SecureConsole.isVirtualStorageResource(fso.getFullPath())
-                && fso instanceof RegularFile) {
-            RegularFile file = (RegularFile) fso;
-            return SecureResourceProvider.createAuthorizationUri(file);
-        }
-
-        // Try to resolve media data or return a file uri
-        final File file = new File(fso.getFullPath());
+    private static Uri getUriFromFile(Context ctx, File file) {
         Uri uri = MediaHelper.fileToContentUri(ctx, file);
-        if (uri == null || MimeTypeHelper.getCategoryFromExt(
-                ctx,FileHelper.getExtension(fso), fso.getFullPath())== MimeTypeCategory.AUDIO) {
+        if (uri == null) {
             uri = Uri.fromFile(file);
         }
         return uri;
