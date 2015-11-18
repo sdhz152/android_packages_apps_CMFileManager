@@ -299,7 +299,6 @@
   <string name="pref">Nastavenia</string>
   <string name="pref_general">Všeobecné nastavenia</string>
   <string name="pref_search">Nastavenie vyhľadávania</string>
-  <string name="pref_storage">Možnosti úložiska</string>
   <string name="pref_editor">Voľby editora</string>
   <string name="pref_themes">Témy</string>
   <string name="pref_about">O aplikácii</string>

@@ -292,7 +292,6 @@
   <string name="pref">Ρυθμίσεις</string>
   <string name="pref_general">Γενικές ρυθμίσεις</string>
   <string name="pref_search">Επιλογές αναζήτησης</string>
-  <string name="pref_storage">Επιλογές αποθήκευσης</string>
   <string name="pref_editor">Επιλογές επεξεργασίας</string>
   <string name="pref_themes">Θέματα</string>
   <string name="pref_about">Σχετικά</string>

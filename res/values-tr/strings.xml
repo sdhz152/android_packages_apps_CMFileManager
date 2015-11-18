@@ -292,7 +292,6 @@
   <string name="pref">Ayarlar</string>
   <string name="pref_general">Genel ayarlar</string>
   <string name="pref_search">Arama seçenekleri</string>
-  <string name="pref_storage">Depolama seçenekleri</string>
   <string name="pref_editor">Düzenleyici ayarları</string>
   <string name="pref_themes">Temalar</string>
   <string name="pref_about">Hakkında</string>

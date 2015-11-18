@@ -289,7 +289,6 @@
   <string name="pref">Ajustes</string>
   <string name="pref_general">Ajustes generales</string>
   <string name="pref_search">Opciones de búsqueda</string>
-  <string name="pref_storage">Opciones de almacenamiento</string>
   <string name="pref_editor">Opciones del editor</string>
   <string name="pref_themes">Temas</string>
   <string name="pref_about">Acerca de</string>

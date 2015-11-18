@@ -615,8 +615,6 @@
     <string name="pref_general">General settings</string>
     <!-- Preferences - Search title -->
     <string name="pref_search">Search options</string>
-    <!-- Preferences - Storage title -->
-    <string name="pref_storage">Storage options</string>
     <!-- Preferences - Editor title -->
     <string name="pref_editor">Editor options</string>
     <!-- Preferences - Themes title -->

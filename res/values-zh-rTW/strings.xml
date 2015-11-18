@@ -292,7 +292,6 @@
   <string name="pref">設定</string>
   <string name="pref_general">一般設定</string>
   <string name="pref_search">搜尋選項</string>
-  <string name="pref_storage">儲存選項</string>
   <string name="pref_editor">編輯器選項</string>
   <string name="pref_themes">主題</string>
   <string name="pref_about">關於</string>

@@ -292,7 +292,6 @@
   <string name="pref">Einstellungen</string>
   <string name="pref_general">Allgemeine Einstellungen</string>
   <string name="pref_search">Sucheinstellungen</string>
-  <string name="pref_storage">Speicheroptionen</string>
   <string name="pref_editor">Editoreinstellungen</string>
   <string name="pref_themes">Designs</string>
   <string name="pref_about">Über</string>

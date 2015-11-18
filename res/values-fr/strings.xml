@@ -301,7 +301,6 @@
   <string name="pref">Paramètres</string>
   <string name="pref_general">Paramètres généraux</string>
   <string name="pref_search">Options de recherche</string>
-  <string name="pref_storage">Options de stockage</string>
   <string name="pref_editor">Options de l\'éditeur</string>
   <string name="pref_themes">Thèmes</string>
   <string name="pref_about">À propos</string>
