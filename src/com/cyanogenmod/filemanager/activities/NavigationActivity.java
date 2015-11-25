@@ -1905,6 +1905,9 @@ public class NavigationActivity extends Activity
             this.getCurrentNavigationView().refresh((FileSystemObject)o);
         } else if (o == null) {
             // Refresh all
+            if(clearSelection){
+                getCurrentNavigationView().recycle();
+            }
             getCurrentNavigationView().refresh();
         }
         if (clearSelection) {
