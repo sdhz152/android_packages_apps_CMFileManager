@@ -2239,8 +2239,8 @@ public class NavigationActivity extends Activity
                 String path = ((NavigationViewInfoParcelable)h.getItem()).getCurrentDir();
 
                 try {
-                    FileSystemObject info = CommandHelper.getFileInfo(this, path, null);
-                    if (info != null) {
+                    File f = new File(path);
+                    if (f.exists()) {
                         break;
                     }
                     this.mHistory.remove(this.mHistory.size() - 1);
