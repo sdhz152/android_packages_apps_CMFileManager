@@ -53,6 +53,8 @@ public class MimeTypeIndexProvider extends ContentProvider {
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_SIZE = "size";
 
+    private static final String EMULATED_MOUNT_POINT_M = "/storage/emulated";
+
     public static Uri getContentUri() {
         return new Uri.Builder().scheme("content").authority(AUTHORITY).path
                 (DatabaseHelper.INDEX_TABLE).build();
@@ -189,6 +191,9 @@ public class MimeTypeIndexProvider extends ContentProvider {
         if (TextUtils.isEmpty(fileRoot)) {
             throw new IllegalArgumentException("'fileRoot' cannot be null or empty!");
         }
+        if (fileRoot.equals(EMULATED_MOUNT_POINT_M)) {
+            fileRoot = fileRoot + "/0";
+        }
         String selection = COLUMN_FILE_ROOT + " = ?";
         String[] selectionArgs = new String[] { fileRoot };
         return context.getContentResolver().query(MimeTypeIndexProvider.getContentUri(),
@@ -213,7 +218,10 @@ public class MimeTypeIndexProvider extends ContentProvider {
         if (TextUtils.isEmpty(fileRoot)) {
             throw new IllegalArgumentException("'fileRoot' cannot be null or empty!");
         }
-                String selection = COLUMN_FILE_ROOT + " = ?";
+        if (fileRoot.equals(EMULATED_MOUNT_POINT_M)) {
+            fileRoot = fileRoot + "/0";
+        }
+        String selection = COLUMN_FILE_ROOT + " = ?";
         String[] selectionArgs = new String[] { fileRoot };
         return context.getContentResolver().delete(MimeTypeIndexProvider.getContentUri(), selection, selectionArgs);
     }
