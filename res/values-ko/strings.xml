@@ -292,7 +292,6 @@
   <string name="pref">설정</string>
   <string name="pref_general">일반 설정</string>
   <string name="pref_search">검색 설정</string>
-  <string name="pref_storage">저장소 설정</string>
   <string name="pref_editor">편집기 설정</string>
   <string name="pref_themes">테마</string>
   <string name="pref_about">정보</string>

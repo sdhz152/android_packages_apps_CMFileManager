@@ -293,7 +293,6 @@
   <string name="pref">Configuració</string>
   <string name="pref_general">Configuració general</string>
   <string name="pref_search">Opcions de cerca</string>
-  <string name="pref_storage">Opcions d\'emmagatzematge</string>
   <string name="pref_editor">Opcions de l\'editor</string>
   <string name="pref_themes">Temes</string>
   <string name="pref_about">Quant a</string>

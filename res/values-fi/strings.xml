@@ -292,7 +292,6 @@
   <string name="pref">Asetukset</string>
   <string name="pref_general">Yleiset asetukset</string>
   <string name="pref_search">Haun asetukset</string>
-  <string name="pref_storage">Tallennustilan asetukset</string>
   <string name="pref_editor">Editorin asetukset</string>
   <string name="pref_themes">Teemat</string>
   <string name="pref_about">Tietoja</string>

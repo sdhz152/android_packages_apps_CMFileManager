@@ -293,7 +293,6 @@
   <string name="pref">設定</string>
   <string name="pref_general">全般設定</string>
   <string name="pref_search">検索オプション</string>
-  <string name="pref_storage">ストレージオプション</string>
   <string name="pref_editor">エディタオプション</string>
   <string name="pref_themes">テーマ</string>
   <string name="pref_about">情報</string>

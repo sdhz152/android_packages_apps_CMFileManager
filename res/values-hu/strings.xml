@@ -292,7 +292,6 @@
   <string name="pref">Beállítások</string>
   <string name="pref_general">Általános beállítások</string>
   <string name="pref_search">Keresési opciók</string>
-  <string name="pref_storage">Tároló beállításai</string>
   <string name="pref_editor">Szerkesztő beállítások</string>
   <string name="pref_themes">Témák</string>
   <string name="pref_about">Névjegy</string>
