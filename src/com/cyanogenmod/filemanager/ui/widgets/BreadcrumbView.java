@@ -16,6 +16,7 @@
 
 package com.cyanogenmod.filemanager.ui.widgets;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -73,6 +74,7 @@ public class BreadcrumbView extends RelativeLayout implements Breadcrumb, OnClic
 
     protected String mCurrentPath;
 
+    ProgressDialog mLoadingDialog;
     /**
      * Constructor of <code>BreadcrumbView</code>.
      *
@@ -127,6 +129,9 @@ public class BreadcrumbView extends RelativeLayout implements Breadcrumb, OnClic
         this.mFilesystemInfo = (ImageView)findViewById(R.id.ab_filesystem_info);
         this.mDiskUsageInfo = (ProgressBar)findViewById(R.id.breadcrumb_diskusage);
         this.mLoading = findViewById(R.id.breadcrumb_loading);
+        this.mLoadingDialog = new ProgressDialog(getContext());
+        this.mLoadingDialog.setMessage(getContext().getText(R.string.loading_message));
+        this.mLoadingDialog.setCancelable(false);
 
         // Change the image of filesystem (this is not called after a changeBreadcrumbPath call,
         // so if need to be theme previously to protect from errors)
@@ -170,7 +175,7 @@ public class BreadcrumbView extends RelativeLayout implements Breadcrumb, OnClic
             public void run() {
                 BreadcrumbView.this.mFilesystemInfo.setVisibility(View.INVISIBLE);
                 BreadcrumbView.this.mDiskUsageInfo.setVisibility(View.INVISIBLE);
-                BreadcrumbView.this.mLoading.setVisibility(View.VISIBLE);
+                BreadcrumbView.this.mLoadingDialog.show();
             }
         });
     }
@@ -184,7 +189,7 @@ public class BreadcrumbView extends RelativeLayout implements Breadcrumb, OnClic
         this.post(new Runnable() {
             @Override
             public void run() {
-                BreadcrumbView.this.mLoading.setVisibility(View.INVISIBLE);
+                BreadcrumbView.this.mLoadingDialog.dismiss();
                 BreadcrumbView.this.mFilesystemInfo.setVisibility(View.VISIBLE);
                 BreadcrumbView.this.mDiskUsageInfo.setVisibility(View.VISIBLE);
             }
