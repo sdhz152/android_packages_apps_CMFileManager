@@ -55,6 +55,7 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
         CREATE_COPY,
     }
 
+    private static boolean mIsClear = false;
 
     /**
      * A class that holds a relationship between a source {@link File} and
@@ -311,10 +312,14 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
                     }
                 }
 
-                //Operation complete. Refresh
+                // Operation complete. Refresh
                 if (this.mOnRequestRefreshListener != null) {
-                  // The reference is not the same, so refresh the complete navigation view
-                  this.mOnRequestRefreshListener.onRequestRefresh(null, true);
+                    // The reference is not the same, so refresh the complete navigation view
+                    if (mIsClear) {
+                        this.mOnRequestRefreshListener.onRequestRefresh(null, true);
+                    } else {
+                        this.mOnRequestRefreshListener.onRequestRefresh(null, false);
+                    }
                 }
             }
 
@@ -492,6 +497,7 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
                                         if (which == DialogInterface.BUTTON_NEGATIVE) {
                                             // Execute background task
                                             task.execute(task);
+                                            mIsClear = true;
                                         }
                                     }
                                });
@@ -502,6 +508,7 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
 
         // Execute background task
         task.execute(task);
+        mIsClear = false;
     }
 
     /**

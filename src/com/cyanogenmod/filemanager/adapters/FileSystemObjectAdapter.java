@@ -144,7 +144,7 @@ public class FileSystemObjectAdapter
         clear();
         if (mIconHolder != null) {
             mIconHolder.cleanup();
-            mIconHolder = null;
+            //mIconHolder = null;
         }
         this.mSelectedItems.clear();
     }
