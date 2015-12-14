@@ -1370,6 +1370,7 @@ public class SearchActivity extends Activity
     private void exit() {
         if (this.mSearchListView.getAdapter() != null) {
             ((SearchResultAdapter)this.mSearchListView.getAdapter()).dispose();
+            this.mSearchListView.setAdapter(null);
         }
         finish();
     }
