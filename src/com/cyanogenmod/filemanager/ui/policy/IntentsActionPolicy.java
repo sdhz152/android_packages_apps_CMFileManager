@@ -92,6 +92,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
     public static final String GALLERY2_PACKAGE = "com.android.gallery3d";
 
     /**
+     * The package name of Mms.
+     */
+    public static final String MMS_PACKAGE = "com.android.mms";
+
+    /**
      * DRM related action to BUY_LICENSE
      */
     public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
@@ -506,7 +511,10 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         } else {
             // Opening image files with Gallery2 will behave incorrectly when started
             // as a new task. We want to be able to return to CMFM with the back button.
-            if (!(Intent.ACTION_VIEW.equals(intent.getAction())
+            // Send files via mms will show old messages when started as a new task. So
+            // add a judgement here.
+            if ((!isMms(ri))
+                  && !(Intent.ACTION_VIEW.equals(intent.getAction())
                   && isGallery2(ri)
                   && intent.getData() != null
                   && MediaStore.AUTHORITY.equals(intent.getData().getAuthority()))) {
@@ -609,6 +617,9 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         return GALLERY2_PACKAGE.equals(ri.activityInfo.packageName);
     }
 
+    public static final boolean isMms(ResolveInfo ri) {
+        return MMS_PACKAGE.equals(ri.activityInfo.packageName);
+    }
     /**
      * Method that retrieve the finds the preferred activity, if one exists. In case
      * of multiple preferred activity exists the try to choose the better
