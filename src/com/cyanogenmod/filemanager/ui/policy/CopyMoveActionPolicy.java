@@ -508,7 +508,8 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
 
         // Execute background task
         task.execute(task);
-        mIsClear = false;
+        // All the selected item will be copyed or moved, so the navigation view should deselect all
+        mIsClear = true;
     }
 
     /**
