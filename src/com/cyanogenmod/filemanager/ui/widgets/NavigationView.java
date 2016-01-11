@@ -17,13 +17,16 @@
 package com.cyanogenmod.filemanager.ui.widgets;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.os.storage.StorageVolume;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -82,10 +85,11 @@ import java.util.Map;
  */
 public class NavigationView extends RelativeLayout implements
 AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener,
-BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRefreshListener {
+BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRefreshListener,
+        android.content.DialogInterface.OnKeyListener {
 
     private static final String TAG = "NavigationView"; //$NON-NLS-1$
-
+    private ProgressDialog mLoadingDialog = null;
     /**
      * An interface to communicate selection changes events.
      */
@@ -229,6 +233,17 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
             this.mRestrictions = restrictions;
             this.mChRooted = chRooted;
         }
+        @Override
+        protected void onPreExecute() {
+            // Start of loading data
+            if (NavigationView.this.mBreadcrumb != null) {
+                try {
+                    NavigationView.this.mBreadcrumb.startLoading();
+                } catch (Throwable ex) {
+                    /** NON BLOCK **/
+                }
+            }
+        }
 
         /**
          * {@inheritDoc}
@@ -257,17 +272,6 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
                         }
                     });
                 }
-
-
-                //Start of loading data
-                if (NavigationView.this.mBreadcrumb != null) {
-                    try {
-                        NavigationView.this.mBreadcrumb.startLoading();
-                    } catch (Throwable ex) {
-                        /**NON BLOCK**/
-                    }
-                }
-
                 //Get the files, resolve links and apply configuration
                 //(sort, hidden, ...)
                 List<FileSystemObject> files = NavigationView.this.mFiles;
@@ -657,6 +661,23 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
     public void setBreadcrumb(Breadcrumb breadcrumb) {
         this.mBreadcrumb = breadcrumb;
         this.mBreadcrumb.addBreadcrumbListener(this);
+        this.mLoadingDialog = this.mBreadcrumb.getLoadingDialog();
+        this.mLoadingDialog.setOnKeyListener(this);
+    }
+    @Override
+    public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+        // TODO Auto-generated method stub
+        if (keyCode == KeyEvent.KEYCODE_BACK && this.mLoadingDialog.isShowing()) {
+            this.mLoadingDialog.dismiss();
+            if (this.mNavigationTask != null
+                    && !this.mNavigationTask.isCancelled()) {
+                this.mCurrentDir = this.mPreviousDir;
+                this.mPreviousDir = null;
+                mNavigationTask.cancel(true);
+                mNavigationTask = null;
+            }
+        }
+        return false;
     }
 
     /**

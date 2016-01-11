@@ -390,4 +390,10 @@ public class BreadcrumbView extends RelativeLayout implements Breadcrumb, OnClic
             }
         }
     }
+
+    @Override
+    public ProgressDialog getLoadingDialog() {
+        // TODO Auto-generated method stub
+        return mLoadingDialog;
+    }
 }

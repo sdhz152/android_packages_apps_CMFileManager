@@ -16,6 +16,7 @@
 
 package com.cyanogenmod.filemanager.ui.widgets;
 
+import android.app.ProgressDialog;
 import com.cyanogenmod.filemanager.model.DiskUsage;
 import com.cyanogenmod.filemanager.model.MountPoint;
 
@@ -23,6 +24,10 @@ import com.cyanogenmod.filemanager.model.MountPoint;
  * An interface that defines the breadcrumb operations.
  */
 public interface Breadcrumb {
+    /**
+     * Method that get loadingDialog.
+     */
+    ProgressDialog getLoadingDialog();
 
     /**
      * Method that initializes the loading of data.
