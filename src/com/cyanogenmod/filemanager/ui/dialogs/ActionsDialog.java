@@ -201,6 +201,16 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
     }
 
     /**
+     * Method that judge if the dialog is showing or not.
+     */
+    public boolean isShowing() {
+        if (this.mDialog != null) {
+            return this.mDialog.isShowing();
+        }
+        return false;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
