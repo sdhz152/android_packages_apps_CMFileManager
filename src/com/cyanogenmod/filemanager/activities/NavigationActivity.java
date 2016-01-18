@@ -42,6 +42,8 @@ import android.os.Parcelable;
 import android.os.storage.StorageVolume;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -100,6 +102,8 @@ import com.cyanogenmod.filemanager.ui.dialogs.ActionsDialog;
 import com.cyanogenmod.filemanager.ui.dialogs.FilesystemInfoDialog;
 import com.cyanogenmod.filemanager.ui.dialogs.InitialDirectoryDialog;
 import com.cyanogenmod.filemanager.ui.dialogs.FilesystemInfoDialog.OnMountListener;
+import com.cyanogenmod.filemanager.ui.dialogs.MessageProgressDialog;
+import com.cyanogenmod.filemanager.ui.policy.CopyMoveActionPolicy;
 import com.cyanogenmod.filemanager.ui.widgets.Breadcrumb;
 import com.cyanogenmod.filemanager.ui.widgets.ButtonItem;
 import com.cyanogenmod.filemanager.ui.widgets.NavigationCustomTitleView;
@@ -146,6 +150,7 @@ public class NavigationActivity extends Activity
     OnNavigationRequestMenuListener, OnNavigationSelectionChangedListener {
 
     private static final String TAG = "NavigationActivity"; //$NON-NLS-1$
+    private static final String KEY_SAVED_BUNDLE = "SAVED_BUNDLE";
 
     private static boolean DEBUG = false;
 
@@ -199,6 +204,7 @@ public class NavigationActivity extends Activity
     private SearchView mSearchView;
     private NavigationCustomTitleView mCustomTitleView;
     private ActionsDialog mActionsDialog;
+    private MessageProgressDialog mMessageProgressDialog;
 
     private final BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
         @Override
@@ -724,6 +730,61 @@ public class NavigationActivity extends Activity
 
         //All destroy. Continue
         super.onDestroy();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        if (CopyMoveActionPolicy.isOperationing()) {
+            outState.putBundle(KEY_SAVED_BUNDLE, CopyMoveActionPolicy.getDialogInfo());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if (CopyMoveActionPolicy.isOperationing()) {
+            CopyMoveActionPolicy.setGlobalOnRequestRefreshListener(this);
+            Bundle bundle = savedInstanceState.getBundle(KEY_SAVED_BUNDLE);
+
+            if (bundle != null) {
+                int operation = bundle.getInt(CopyMoveActionPolicy.KEY_OPERATION);
+                String srcPath = bundle.getString(CopyMoveActionPolicy.KEY_SRC_PATH);
+                String dstPath = bundle.getString(CopyMoveActionPolicy.KEY_DST_PATH);
+
+                String progress = this.getResources().getString(
+                        operation == 0 ? R.string.waiting_dialog_moving_msg :
+                        R.string.waiting_dialog_copying_msg,
+                        srcPath,
+                        dstPath);
+                Spanned spannedProgress = Html.fromHtml(progress);
+
+                mMessageProgressDialog = new MessageProgressDialog(
+                        this,
+                        0,
+                        R.string.waiting_dialog_msg,
+                        R.string.waiting_dialog_msg,
+                        false);
+                mMessageProgressDialog.setOnCancelListener(
+                        new MessageProgressDialog.OnCancelListener() {
+                    @Override
+                    public boolean onCancel() {
+                        CopyMoveActionPolicy.stopOperation(true);
+                        return true;
+                    }
+                });
+                mMessageProgressDialog.setProgress(spannedProgress);
+                mMessageProgressDialog.show();
+            }
+        }
     }
 
     /**
@@ -1912,6 +1973,11 @@ public class NavigationActivity extends Activity
         }
         if (clearSelection) {
             this.getCurrentNavigationView().onDeselectAll();
+        }
+
+        if (mMessageProgressDialog != null && mMessageProgressDialog.isShowing()) {
+            mMessageProgressDialog.dismiss();
+            mMessageProgressDialog = null;
         }
     }
 

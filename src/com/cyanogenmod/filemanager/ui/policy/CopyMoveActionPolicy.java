@@ -19,6 +19,7 @@ package com.cyanogenmod.filemanager.ui.policy;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 
@@ -57,6 +58,18 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
 
     private static boolean mIsClear = false;
 
+    private static boolean mIsWorking = false;
+    private static COPY_MOVE_OPERATION mGlobalOperation;
+    private static List<LinkedResource> mGlobalFiles;
+    private static OnRequestRefreshListener mGlobalOnRequestRefreshListener;
+    private static BackgroundAsyncTask mTask;
+
+    public static final String KEY_OPERATION = "KEY_OPERATION";
+    public static final String KEY_SRC_PATH = "KEY_SRC_PATH";
+    public static final String KEY_DST_PATH = "KEY_DST_PATH";
+    public static final int VALUE_OPERATION_MOVE_RENAME = 0;
+    public static final int VALUE_OPERATION_COPY = 1;
+
     /**
      * A class that holds a relationship between a source {@link File} and
      * his destination {@link File}
@@ -84,6 +97,39 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
         public int compareTo(LinkedResource another) {
             return this.mSrc.compareTo(another.mSrc);
         }
+    }
+
+    public static void stopOperation(boolean mayInterruptIfRunning) {
+        if (mIsWorking && mTask != null) {
+            mTask.cancel(mayInterruptIfRunning);
+        }
+    }
+
+    public static void setGlobalOnRequestRefreshListener(OnRequestRefreshListener listener) {
+        mGlobalOnRequestRefreshListener = listener;
+    }
+
+    public static boolean isOperationing() {
+        return mIsWorking;
+    }
+
+    public static Bundle getDialogInfo() {
+        Bundle bundle = new Bundle();
+
+        File src = mGlobalFiles.get(0).mSrc;
+        File dst = mGlobalFiles.get(0).mDst;
+
+        bundle.putString(KEY_SRC_PATH, src.getAbsolutePath());
+        bundle.putString(KEY_DST_PATH, dst.getAbsolutePath());
+
+        if (mGlobalOperation.equals(COPY_MOVE_OPERATION.MOVE)||
+                mGlobalOperation.equals(COPY_MOVE_OPERATION.RENAME)) {
+            bundle.putInt(KEY_OPERATION, VALUE_OPERATION_MOVE_RENAME);
+        } else {
+            bundle.putInt(KEY_OPERATION, VALUE_OPERATION_COPY);
+        }
+
+        return bundle;
     }
 
     /**
@@ -216,6 +262,9 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
             final OnSelectionListener onSelectionListener,
             final OnRequestRefreshListener onRequestRefreshListener) {
 
+        mGlobalOperation = operation;
+        mGlobalFiles = files;
+
         // Some previous checks prior to execute
         // 1.- Listener couldn't be null
         if (onSelectionListener == null) {
@@ -321,17 +370,24 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
                         this.mOnRequestRefreshListener.onRequestRefresh(null, false);
                     }
                 }
+                if (mGlobalOnRequestRefreshListener != null) {
+                    mGlobalOnRequestRefreshListener.onRequestRefresh(null, mIsClear);
+                }
             }
 
             @Override
             public void onSuccess() {
                 refreshUIAfterCompletion();
                 ActionsPolicy.showOperationSuccessMsg(ctx);
+                mIsWorking = false;
             }
 
             @Override
             public void doInBackground(Object... params) throws Throwable {
                 this.mCause = null;
+
+                // Set the original state
+                mIsWorking = true;
 
                 // This method expect to receive
                 // 1.- BackgroundAsyncTask
@@ -354,6 +410,7 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
 
             @Override
             public void onCancel() {
+                mIsWorking = false;
                 if (mSrcConsole != null) {
                     mSrcConsole.onCancel();
                 }
@@ -475,7 +532,9 @@ public final class CopyMoveActionPolicy extends ActionsPolicy {
                 }
             }
         };
-        final BackgroundAsyncTask task = new BackgroundAsyncTask(ctx, callable);
+
+        mTask = new BackgroundAsyncTask(ctx, callable);
+        final BackgroundAsyncTask task = mTask;
 
         // Prior to execute, we need to check if some of the files will be overwritten
         List<FileSystemObject> curFiles = onSelectionListener.onRequestCurrentItems();
