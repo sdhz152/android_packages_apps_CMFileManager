@@ -33,6 +33,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceActivity;
 import android.text.Editable;
 import android.text.InputType;
@@ -101,6 +102,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -116,6 +118,52 @@ public class EditorActivity extends Activity implements TextWatcher {
     private static boolean DEBUG = false;
 
     private static final int WRITE_RETRIES = 3;
+
+    private String mContentStr;
+    private int mContentLength;
+    private int mCurPos = 0;
+    private static final int mStep = 2048;
+    private static final int MSG_LOAD_REMAIN_TEXT = 1000;
+
+    private static class PartLoadTextHandler extends Handler {
+
+        private WeakReference<EditorActivity> mActivity;
+
+        public PartLoadTextHandler(EditorActivity activity) {
+            mActivity = new WeakReference<EditorActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            EditorActivity activity = mActivity.get();
+            if (activity == null) {
+                return;
+            }
+
+            switch (msg.what) {
+                case MSG_LOAD_REMAIN_TEXT:
+                    boolean keepLoading = true;
+                    activity.mCurPos += mStep;
+                    int start = activity.mCurPos;
+                    int end = start + activity.mStep;
+                    if (end >= activity.mContentLength) {
+                        keepLoading = false;
+                        end = activity.mContentLength;
+                    }
+                    String part = activity.mContentStr.substring(start, end);
+                    activity.mEditor.append(part);
+                    activity.setDirty(false);
+                    if (keepLoading) {
+                        activity.mPartLoadTextHandler.
+                                sendEmptyMessage(activity.MSG_LOAD_REMAIN_TEXT);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    private PartLoadTextHandler mPartLoadTextHandler = new PartLoadTextHandler(this);
 
     private final BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
         @Override
@@ -1180,8 +1228,15 @@ public class EditorActivity extends Activity implements TextWatcher {
                             }
                         } else {
                             // Now we have the buffer, set the text of the editor
-                            activity.mEditor.setText(
-                                    tempText, BufferType.EDITABLE);
+                            mContentStr = tempText;
+                            mContentLength = mContentStr.length();
+                            if (mStep < mContentLength) {
+                                String part = mContentStr.substring(0, mStep);
+                                activity.mEditor.setText(part, BufferType.EDITABLE);
+                                mPartLoadTextHandler.sendEmptyMessage(MSG_LOAD_REMAIN_TEXT);
+                            } else {
+                                activity.mEditor.setText(tempText, BufferType.EDITABLE);
+                            }
 
                             // Highlight editor text syntax
                             if (activity.mSyntaxHighlight &&
@@ -1376,8 +1431,15 @@ public class EditorActivity extends Activity implements TextWatcher {
                         // Cleanup
                         this.mReader.mBinaryBuffer = null;
                     } else {
-                        activity.mEditor.setText(
-                                this.mReader.mBuffer, BufferType.EDITABLE);
+                        mContentStr = this.mReader.mBuffer.toString();
+                        mContentLength = mContentStr.length();
+                        if (mStep < mContentLength) {
+                            String part = mContentStr.substring(0, mStep);
+                            activity.mEditor.setText(part, BufferType.EDITABLE);
+                            mPartLoadTextHandler.sendEmptyMessage(MSG_LOAD_REMAIN_TEXT);
+                        } else {
+                            activity.mEditor.setText(this.mReader.mBuffer, BufferType.EDITABLE);
+                        }
 
                         // Highlight editor text syntax
                         if (activity.mSyntaxHighlight &&
