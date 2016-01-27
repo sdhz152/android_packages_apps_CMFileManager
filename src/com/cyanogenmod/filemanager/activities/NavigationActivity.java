@@ -104,6 +104,7 @@ import com.cyanogenmod.filemanager.ui.dialogs.InitialDirectoryDialog;
 import com.cyanogenmod.filemanager.ui.dialogs.FilesystemInfoDialog.OnMountListener;
 import com.cyanogenmod.filemanager.ui.dialogs.MessageProgressDialog;
 import com.cyanogenmod.filemanager.ui.policy.CopyMoveActionPolicy;
+import com.cyanogenmod.filemanager.ui.policy.IntentsActionPolicy;
 import com.cyanogenmod.filemanager.ui.widgets.Breadcrumb;
 import com.cyanogenmod.filemanager.ui.widgets.ButtonItem;
 import com.cyanogenmod.filemanager.ui.widgets.NavigationCustomTitleView;
@@ -1783,7 +1784,10 @@ public class NavigationActivity extends Activity
             mDrawerLayout.closeDrawer(Gravity.START);
             return;
         }
-
+        if (IntentsActionPolicy.sendTask != null) {
+            IntentsActionPolicy.sendTask.cancel(true);
+            IntentsActionPolicy.sendTask = null;
+        }
         boolean upToParent = mHistory.size() > 0;
 
         if (mNeedsEasyMode && !isEasyModeVisible() && !upToParent) {

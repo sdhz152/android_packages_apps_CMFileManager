@@ -27,6 +27,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
@@ -100,6 +101,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
      * DRM related action to BUY_LICENSE
      */
     public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
+
+    /**
+     * a AsyncTask of send selection
+     */
+    public static SendSelectionTask sendTask = null;
 
     /**
      * Method that opens a {@link FileSystemObject} with the default registered application
@@ -195,64 +201,97 @@ public final class IntentsActionPolicy extends ActionsPolicy {
      * @param onCancelListener The cancel listener
      * @param onDismissListener The dismiss listener
      */
-    public static void sendMultipleFileSystemObject(
-            final Context ctx, final List<FileSystemObject> fsos,
-            OnCancelListener onCancelListener, OnDismissListener onDismissListener) {
-        try {
-            // Create the intent to
-            Intent intent = new Intent();
-            intent.setAction(android.content.Intent.ACTION_SEND_MULTIPLE);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            // Create an array list of the uris to send
-            ArrayList<Uri> uris = new ArrayList<Uri>();
-            int cc = fsos.size();
-            String lastMimeType = null;
-            boolean sameMimeType = true;
-            for (int i = 0; i < cc; i++) {
-                FileSystemObject fso = fsos.get(i);
-
-                // Folders are not allowed
-                if (FileHelper.isDirectory(fso)) continue;
-
-                // Check if we can use a unique mime/type
-                String mimeType = MimeTypeHelper.getMimeType(ctx, fso);
-                if (mimeType == null) {
-                    sameMimeType = false;
-                }
-                if (sameMimeType &&
-                    (mimeType != null && lastMimeType != null &&
-                     mimeType.compareTo(lastMimeType) != 0)) {
-                    sameMimeType = false;
-                }
-                lastMimeType = mimeType;
-
-                // Add the uri
-                uris.add(getUriFromFile(ctx, new File(fso.getFullPath())));
-            }
-            if (sameMimeType) {
-                intent.setType(lastMimeType);
-            } else {
-                intent.setType(MimeTypeHelper.ALL_MIME_TYPES);
-            }
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-
-            // Resolve the intent
-            resolveIntent(
-                    ctx,
-                    intent,
-                    true,
-                    null,
-                    0,
-                    R.string.associations_dialog_sendwith_title,
-                    R.string.associations_dialog_sendwith_action,
-                    false, onCancelListener, onDismissListener);
-
-        } catch (Exception e) {
-            ExceptionUtil.translateException(ctx, e);
-        }
+    public static void sendMultipleFileSystemObject(final Context ctx,
+            final List<FileSystemObject> fsos,
+            OnCancelListener onCancelListener,
+            OnDismissListener onDismissListener) {
+        sendTask = new SendSelectionTask(ctx, onCancelListener,
+                onDismissListener, fsos);
+        sendTask.execute();
     }
 
+    /**
+     * Method that a AsyncTask to send selection
+     *
+     * @param ctx The current context
+     * @param fsos The file system objects
+     * @param onCancelListener The cancel listener
+     * @param onDismissListener The dismiss listener
+     */
+    public static class SendSelectionTask extends
+            AsyncTask<Object[], Void, Intent> {
+        Context ctx;
+        List<FileSystemObject> fsos;
+        OnCancelListener onCancelListener;
+        OnDismissListener onDismissListener;
+
+        public SendSelectionTask(Context ctx,
+                OnCancelListener onCancelListener,
+                OnDismissListener onDismissListener, List<FileSystemObject> fsos) {
+            this.ctx = ctx;
+            this.onCancelListener = onCancelListener;
+            this.onDismissListener = onDismissListener;
+            this.fsos = fsos;
+        }
+
+        @Override
+        protected Intent doInBackground(Object[]... params) {
+            // TODO Auto-generated method stub
+            Intent intent = new Intent();
+            try {
+                // Create the intent to
+                intent.setAction(android.content.Intent.ACTION_SEND_MULTIPLE);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                // Create an array list of the uris to send
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+                int cc = fsos.size();
+                String lastMimeType = null;
+                boolean sameMimeType = true;
+                for (int i = 0; i < cc; i++) {
+                    FileSystemObject fso = fsos.get(i);
+
+                    // Folders are not allowed
+                    if (FileHelper.isDirectory(fso))
+                        continue;
+
+                    // Check if we can use a unique mime/type
+                    String mimeType = MimeTypeHelper.getMimeType(ctx, fso);
+                    if (mimeType == null) {
+                        sameMimeType = false;
+                    }
+                    if (sameMimeType
+                            && (mimeType != null && lastMimeType != null && mimeType
+                                    .compareTo(lastMimeType) != 0)) {
+                        sameMimeType = false;
+                    }
+                    lastMimeType = mimeType;
+
+                    // Add the uri
+                    uris.add(getUriFromFile(ctx, new File(fso.getFullPath())));
+                }
+                if (sameMimeType) {
+                    intent.setType(lastMimeType);
+                } else {
+                    intent.setType(MimeTypeHelper.ALL_MIME_TYPES);
+                }
+                intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            } catch (Exception e) {
+                ExceptionUtil.translateException(ctx, e);
+            }
+            return intent;
+        }
+
+        @Override
+        protected void onPostExecute(Intent intent) {
+            // Resolve the intent
+            resolveIntent(ctx, intent, true, null, 0,
+                    R.string.associations_dialog_sendwith_title,
+                    R.string.associations_dialog_sendwith_action, false,
+                    onCancelListener, onDismissListener);
+
+        }
+    }
     /**
      * Method that resolve
      *
