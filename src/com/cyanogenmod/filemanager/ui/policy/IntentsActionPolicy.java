@@ -97,6 +97,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
     public static final String MMS_PACKAGE = "com.android.mms";
 
     /**
+     * The package name of PackageInstaller.
+     */
+    public static final String PackageInstaller_PACKAGE = "com.android.packageinstaller";
+
+    /**
      * DRM related action to BUY_LICENSE
      */
     public static final String BUY_LICENSE = "android.drmservice.intent.action.BUY_LICENSE";
@@ -493,10 +498,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
      * @return Intent The intent
      */
     public static final Intent getIntentFromResolveInfo(ResolveInfo ri, Intent request) {
+        String cn = ri.activityInfo.applicationInfo.packageName;
         Intent intent =
                 getIntentFromComponentName(
                     new ComponentName(
-                        ri.activityInfo.applicationInfo.packageName,
+                        cn,
                         ri.activityInfo.name),
                     request);
         boolean isInternalEditor = isInternalEditor(ri);
@@ -523,7 +529,11 @@ public final class IntentsActionPolicy extends ActionsPolicy {
             }
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         }
-
+        // PackageInstaller will have an activity of finishing still in activity stack,
+        // Clear up to avoid anr of clicking launch button  after uninstalling.
+        if (cn.equals(PackageInstaller_PACKAGE))
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         // Grant access to resources if needed
         grantSecureAccessIfNeeded(intent, ri);
 
