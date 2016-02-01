@@ -18,12 +18,14 @@ package com.cyanogenmod.filemanager.util;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-
+import android.os.Bundle;
 import android.util.Log;
+
 import com.cyanogenmod.filemanager.commands.AsyncResultListener;
 import com.cyanogenmod.filemanager.commands.ChangeOwnerExecutable;
 import com.cyanogenmod.filemanager.commands.ChangePermissionsExecutable;
@@ -101,6 +103,8 @@ import java.util.Stack;
 public final class CommandHelper {
 
     private static final String TAG = "CommandHelper";
+    private static final String VOLUME = "volume";
+    private static final String EXTERNAL = "external";
 
     /**
      * A wrapper class for asynchronous operations that need restore the filesystem
@@ -315,8 +319,13 @@ public final class CommandHelper {
         writableExecute(context, executable, c);
 
         // Do media scan
-        MediaScannerConnection.scanFile(context, new String[]{
-                MediaHelper.normalizeMediaPath(directory)}, null, null);
+        Bundle args = new Bundle();
+        args.putString(VOLUME, EXTERNAL);
+        Intent startScan = new Intent();
+        startScan.putExtras(args);
+        startScan.setComponent(new ComponentName("com.android.providers.media",
+                "com.android.providers.media.MediaScannerService"));
+        context.startService(startScan);
 
         return executable.getResult().booleanValue();
     }
