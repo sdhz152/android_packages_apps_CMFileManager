@@ -136,6 +136,9 @@ public class SearchActivity extends Activity
     //Minimum characters to allow query
     private static final int MIN_CHARS_SEARCH = 3;
 
+    //search info
+    public static SearchInfoParcelable mSearchInfoParcelable = null;
+
     private final BroadcastReceiver mNotificationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -508,7 +511,8 @@ public class SearchActivity extends Activity
     private void saveState(Bundle state) {
         try {
             if (this.mSearchListView.getAdapter() != null) {
-                state.putParcelable(EXTRA_SEARCH_RESTORE, createSearchInfo());
+                state.putParcelable(EXTRA_SEARCH_RESTORE, null);
+                mSearchInfoParcelable = createSearchInfo();
             }
         } catch (Throwable ex) {
             Log.w(TAG, "The state can't be saved", ex); //$NON-NLS-1$
@@ -523,7 +527,7 @@ public class SearchActivity extends Activity
     private void restoreState(Bundle state) {
         try {
             if (state.containsKey(EXTRA_SEARCH_RESTORE)) {
-                this.mRestoreState = state.getParcelable(EXTRA_SEARCH_RESTORE);
+                this.mRestoreState = mSearchInfoParcelable;
             }
         } catch (Throwable ex) {
             Log.w(TAG, "The state can't be restored", ex); //$NON-NLS-1$
@@ -1314,8 +1318,7 @@ public class SearchActivity extends Activity
             final Intent intent =  new Intent();
             if (this.mRestoreState != null) {
                 Bundle bundle = new Bundle();
-                bundle.putParcelable(NavigationActivity.EXTRA_SEARCH_LAST_SEARCH_DATA,
-                        (Parcelable)this.mRestoreState);
+               mSearchInfoParcelable = this.mRestoreState;
                 intent.putExtras(bundle);
             }
             setResult(RESULT_CANCELED, intent);
@@ -1387,8 +1390,7 @@ public class SearchActivity extends Activity
                 final Intent intent = new Intent();
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(NavigationActivity.EXTRA_SEARCH_ENTRY_SELECTION, fso);
-                bundle.putParcelable(NavigationActivity.EXTRA_SEARCH_LAST_SEARCH_DATA,
-                        (Parcelable)createSearchInfo());
+                mSearchInfoParcelable = (SearchInfoParcelable)createSearchInfo();
                 intent.putExtras(bundle);
                 setResult(RESULT_OK, intent);
                 return true;
