@@ -1904,40 +1904,42 @@ public class NavigationActivity extends Activity
 
         if (data != null) {
             switch (requestCode) {
-                case INTENT_REQUEST_SEARCH:
-                    if (resultCode == RESULT_OK) {
-                        //Change directory?
-                        Bundle bundle = data.getExtras();
-                        if (bundle != null) {
-                            FileSystemObject fso = (FileSystemObject) bundle.getSerializable(
-                                    EXTRA_SEARCH_ENTRY_SELECTION);
-                            SearchInfoParcelable searchInfo =
-                                    bundle.getParcelable(EXTRA_SEARCH_LAST_SEARCH_DATA);
-                            if (fso != null) {
-                                //Goto to new directory
-                                getCurrentNavigationView().open(fso, searchInfo);
-                                performHideEasyMode();
-                            }
-                        }
-                    } else if (resultCode == RESULT_CANCELED) {
-                        SearchInfoParcelable searchInfo =
-                                data.getParcelableExtra(EXTRA_SEARCH_LAST_SEARCH_DATA);
-                        if (searchInfo != null && searchInfo.isSuccessNavigation()) {
-                            //Navigate to previous history
-                            back();
-                        } else {
-                            // I don't know is the search view was changed, so try to do a refresh
-                            // of the navigation view
-                            getCurrentNavigationView().refresh(true);
+            case INTENT_REQUEST_SEARCH:
+                if (resultCode == RESULT_OK) {
+                    // Change directory?
+                    Bundle bundle = data.getExtras();
+                    if (bundle != null) {
+                        FileSystemObject fso = (FileSystemObject) bundle
+                                .getSerializable(EXTRA_SEARCH_ENTRY_SELECTION);
+
+                        if (fso != null) {
+                            // Goto to new directory
+                            getCurrentNavigationView().open(fso,
+                                    SearchActivity.mSearchInfoParcelable);
+                            performHideEasyMode();
                         }
                     }
-                    // reset bookmarks list to default as the user could have set a
-                    // new bookmark in the search activity
-                    initBookmarks();
-                    break;
+                } else if (resultCode == RESULT_CANCELED) {
 
-                default:
-                    break;
+                    if (SearchActivity.mSearchInfoParcelable != null
+                            && SearchActivity.mSearchInfoParcelable
+                                    .isSuccessNavigation()) {
+                        // Navigate to previous history
+                        back();
+                    } else {
+                        // I don't know is the search view was changed, so try
+                        // to do a refresh
+                        // of the navigation view
+                        getCurrentNavigationView().refresh(true);
+                    }
+                }
+                // reset bookmarks list to default as the user could have set a
+                // new bookmark in the search activity
+                initBookmarks();
+                break;
+
+            default:
+                break;
             }
         }
     }
@@ -2248,10 +2250,10 @@ public class NavigationActivity extends Activity
 
             } else if (realHistory.getItem() instanceof SearchInfoParcelable) {
                 //Search (open search with the search results)
-                SearchInfoParcelable info = (SearchInfoParcelable)realHistory.getItem();
+                SearchActivity.mSearchInfoParcelable = (SearchInfoParcelable)realHistory.getItem();
                 Intent searchIntent = new Intent(this, SearchActivity.class);
                 searchIntent.setAction(SearchActivity.ACTION_RESTORE);
-                searchIntent.putExtra(SearchActivity.EXTRA_SEARCH_RESTORE, (Parcelable)info);
+                searchIntent.putExtra(SearchActivity.EXTRA_SEARCH_RESTORE, "");
                 startActivityForResult(searchIntent, INTENT_REQUEST_SEARCH);
             } else {
                 //The type is unknown
