@@ -167,13 +167,12 @@ public class InputNameDialog
         this.mDialog.setOnCancelListener(this);
         this.mDialog.setOnDismissListener(this);
 
-        // Disable accept button, because name is the same as fso
         if (this.mFso != null && !this.mAllowFsoName) {
             this.mEditText.post(new Runnable() {
                 @Override
                 public void run() {
                     InputNameDialog.this.mDialog.getButton(
-                            DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+                            DialogInterface.BUTTON_POSITIVE).setEnabled(true);
                 }
             });
         } else {
@@ -261,6 +260,12 @@ public class InputNameDialog
             setMsg(
                 InputNameDialog.this.mContext.getString(
                       R.string.input_name_dialog_message_empty_name), false);
+            return;
+        }
+
+        //The name turn to not empty
+        if (!TextUtils.isEmpty(name)) {
+            setMsg(null, true);
             return;
         }
 
