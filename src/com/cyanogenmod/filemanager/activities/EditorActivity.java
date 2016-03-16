@@ -1082,6 +1082,7 @@ public class EditorActivity extends Activity implements TextWatcher {
         // Read the intent and check that is has a valid request
         Intent fileIntent = getIntent();
         if (fileIntent.getData().getScheme().equals("content")) {
+            this.mPrint.setVisibility(View.GONE);
             asyncReadContentURI(fileIntent.getData());
         } else {
             // File Scheme URI's
