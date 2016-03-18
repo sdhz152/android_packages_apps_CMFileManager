@@ -18,6 +18,7 @@ package com.cyanogenmod.filemanager.ui.policy;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.MediaScannerConnection;
 import android.widget.Toast;
 
 import com.cyanogenmod.filemanager.console.ConsoleBuilder;
@@ -29,6 +30,8 @@ import com.cyanogenmod.filemanager.util.DialogHelper;
 import com.cyanogenmod.filemanager.util.ExceptionUtil;
 import com.cyanogenmod.filemanager.util.ExceptionUtil.OnRelaunchCommandResult;
 import com.cyanogenmod.filemanager.util.FileHelper;
+
+import java.io.File;
 
 /**
  * A class with the convenience methods for resolve the display of info actions
@@ -67,6 +70,13 @@ public final class InfoActionPolicy extends ActionsPolicy {
                     if (onRequestRefreshListener != null) {
                         onRequestRefreshListener.onRequestRefresh(dialog.getFso(), false);
                     }
+                }
+
+                File nomedia = FileHelper.getNoMediaFile(fso);
+
+                if (!nomedia.exists()) {
+                    MediaScannerConnection.scanFile(ctx, new String[]{nomedia.getPath()},
+                            null, null);
                 }
             }
         });
