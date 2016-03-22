@@ -74,7 +74,7 @@
     <!-- The navigation grid width -->
     <dimen name="navigation_grid_width">85dp</dimen>
     <!-- The navigation grid height -->
-    <dimen name="navigation_grid_height">85dp</dimen>
+    <dimen name="navigation_grid_height">95dp</dimen>
     <!-- The navigation grid item width -->
     <dimen name="navigation_grid_item_width">25dp</dimen>
     <!-- The navigation grid item height -->

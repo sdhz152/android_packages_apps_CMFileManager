@@ -1016,9 +1016,19 @@ public class EditorActivity extends Activity implements TextWatcher {
 
             case R.id.ab_button1:
                 // Print the file
-                StringBuilder sb = mBinary
-                        ? ((HexDumpAdapter)mBinaryEditor.getAdapter()).toStringDocument()
-                        : new StringBuilder(mEditor.getText().toString());
+                StringBuilder sb;
+
+                if (mBinary) {
+                    HexDumpAdapter adapter = (HexDumpAdapter)mBinaryEditor.getAdapter();
+                    if (adapter != null) {
+                        sb = adapter.toStringDocument();
+                    } else {
+                        sb = new StringBuilder("");
+                    }
+                } else {
+                    sb = new StringBuilder(mEditor.getText().toString());
+                }
+
                 PrintActionPolicy.printStringDocument(this, mFso, sb);
                 break;
 
