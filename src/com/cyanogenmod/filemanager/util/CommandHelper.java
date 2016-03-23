@@ -317,8 +317,13 @@ public final class CommandHelper {
         CreateDirExecutable executable =
                 c.getExecutableFactory().newCreator().createCreateDirectoryExecutable(directory);
         writableExecute(context, executable, c);
+        doMediaScan(context);
 
-        // Do media scan
+        return executable.getResult().booleanValue();
+    }
+
+    // Do media scan
+    public static void doMediaScan(Context context) {
         Bundle args = new Bundle();
         args.putString(VOLUME, EXTERNAL);
         Intent startScan = new Intent();
@@ -326,8 +331,6 @@ public final class CommandHelper {
         startScan.setComponent(new ComponentName("com.android.providers.media",
                 "com.android.providers.media.MediaScannerService"));
         context.startService(startScan);
-
-        return executable.getResult().booleanValue();
     }
 
     /**
@@ -857,7 +860,7 @@ public final class CommandHelper {
                     paths.clear();
                 }
             }
-            MediaScannerConnection.scanFile(context, paths.toArray(new String[paths.size()]), null, null);
+            doMediaScan(context);
         } catch (IOException
                 | ConsoleAllocException
                 | NoSuchFileOrDirectory
