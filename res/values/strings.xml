@@ -19,6 +19,8 @@
     <string name="app_name">File Manager</string>
     <!-- The description of the app -->
     <string name="app_description">A CyanogenMod file manager</string>
+    <!-- on permission of filemanager requesting -->
+    <string name="on_permission_read_filemanager">You have disabled a required permission.</string>
 
     <!-- Human readable sizes -->
     <string name="size_bytes">B</string>
