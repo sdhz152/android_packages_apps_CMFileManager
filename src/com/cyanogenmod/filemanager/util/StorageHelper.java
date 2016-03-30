@@ -19,6 +19,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.util.Log;
 
 import com.cyanogenmod.filemanager.FileManagerApplication;
 import com.cyanogenmod.filemanager.R;
@@ -33,6 +34,7 @@ import java.util.Locale;
  */
 public final class StorageHelper {
 
+    private static final String TAG = "StorageHelper";
     private static StorageVolume[] sStorageVolumes;
 
     /**
@@ -51,9 +53,10 @@ public final class StorageHelper {
             //Use reflect to get this value (if possible)
             try {
                 StorageManager sm = (StorageManager) ctx.getSystemService(Context.STORAGE_SERVICE);
-                Method method = sm.getClass().getMethod("getVolumeList"); //$NON-NLS-1$
-                sStorageVolumes = (StorageVolume[])method.invoke(sm);
-
+                if (sm != null)
+                    sStorageVolumes = sm.getVolumeList();
+                else
+                    Log.e(TAG, "Unable to access Storage Manager");
             } catch (Exception ex) {
                 //Ignore. Android SDK StorageManager class doesn't have this method
                 //Use default android information from environment
@@ -93,28 +96,12 @@ public final class StorageHelper {
     }
 
     /**
-     * Method that returns the storage volume description. This method uses
-     * reflection to retrieve the description because CM10 has a {@link Context}
-     * as first parameter, that AOSP hasn't.
-     *
-     * @param ctx The current context
      * @param volume The storage volume
      * @return String The description of the storage volume
      */
     public static String getStorageVolumeDescription(Context ctx, StorageVolume volume) {
         try {
-            Method method = volume.getClass().getMethod(
-                                            "getDescription", //$NON-NLS-1$
-                                            new Class[]{Context.class});
-            if (method == null) {
-                // AOSP
-                method = volume.getClass().getMethod("getDescription"); //$NON-NLS-1$
-                return (String)method.invoke(volume);
-            }
-
-            // CM10
-            return (String)method.invoke(volume, ctx);
-
+            return volume.getDescription(ctx);
         } catch (Throwable _throw) {
             // Returns the volume storage path
             return volume.getPath();
