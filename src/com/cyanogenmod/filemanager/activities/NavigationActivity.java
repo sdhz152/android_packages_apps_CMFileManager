@@ -335,6 +335,7 @@ public class NavigationActivity extends Activity
                     onRequestBookmarksRefresh();
                     removeUnmountedHistory();
                     removeUnmountedSelection();
+                    getCurrentNavigationView().refresh(true);
                 }
             }
         }
@@ -481,6 +482,7 @@ public class NavigationActivity extends Activity
 
     private boolean mNeedsEasyMode = false;
 
+    private boolean mNoRefreshOnResume;
     /**
      * @hide
      */
@@ -642,6 +644,10 @@ public class NavigationActivity extends Activity
         if (curDir != null) {
             VirtualMountPointConsole vc = VirtualMountPointConsole.getVirtualConsoleForPath(
                     mNavigationViews[mCurrentNavigationView].getCurrentDir());
+
+            if (!mNoRefreshOnResume) {
+                getCurrentNavigationView().refresh(true);
+            }
             if (vc != null && !vc.isMounted()) {
                 onRequestBookmarksRefresh();
                 removeUnmountedHistory();
@@ -1906,6 +1912,7 @@ public class NavigationActivity extends Activity
             switch (requestCode) {
             case INTENT_REQUEST_SEARCH:
                 if (resultCode == RESULT_OK) {
+                    mNoRefreshOnResume = true;
                     // Change directory?
                     Bundle bundle = data.getExtras();
                     if (bundle != null) {
