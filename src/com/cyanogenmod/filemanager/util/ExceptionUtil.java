@@ -76,6 +76,8 @@ public final class ExceptionUtil {
         void onFailed(Throwable cause);
     }
 
+    private static boolean enableShowErrorDialog = true;
+
     /**
      * Constructor of <code>ExceptionUtil</code>.
      */
@@ -246,7 +248,16 @@ public final class ExceptionUtil {
                             AlertDialog dialog =
                                     DialogHelper.createErrorDialog(
                                             context, R.string.error_title, msg);
-                            DialogHelper.delegateDialogShow(context, dialog);
+                            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                                @Override
+                                public void onDismiss(DialogInterface dialog) {
+                                    enableShowErrorDialog = true;
+                                }
+                            });
+                            if (enableShowErrorDialog) {
+                                DialogHelper.delegateDialogShow(context, dialog);
+                                enableShowErrorDialog = false;
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(context.getClass().getSimpleName(),
