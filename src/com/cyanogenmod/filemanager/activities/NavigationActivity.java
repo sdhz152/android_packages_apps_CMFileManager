@@ -511,7 +511,9 @@ public class NavigationActivity extends Activity
      */
     @Override
     protected void onCreate(Bundle state) {
-
+        if (RequestPermissionsActivity.startPermissionActivity(this)) {
+            finish();
+        }
         if (DEBUG) {
             Log.d(TAG, "NavigationActivity.onCreate"); //$NON-NLS-1$
         }
