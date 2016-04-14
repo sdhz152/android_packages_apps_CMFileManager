@@ -136,6 +136,9 @@ public class PickerActivity extends Activity
      */
     @Override
     protected void onCreate(Bundle state) {
+        if (RequestPermissionsActivity.startPermissionActivity(this)) {
+            finish();
+        }
         if (DEBUG) {
             Log.d(TAG, "PickerActivity.onCreate"); //$NON-NLS-1$
         }

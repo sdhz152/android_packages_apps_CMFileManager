@@ -19,6 +19,8 @@ package com.cyanogenmod.filemanager.themes;
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.cyanogenmod.filemanager.activities.RequestPermissionsActivity;
+
 /**
  * A mock activity for allow to <code>File Manager</code> to find this themes.<br/>
  * <br/>
@@ -35,6 +37,9 @@ public class ThemeActivity extends Activity {
      */
     @Override
     protected void onCreate(Bundle state) {
+        if (RequestPermissionsActivity.startPermissionActivity(this)) {
+            finish();
+        }
         //Save state
         super.onCreate(state);
     }

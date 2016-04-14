@@ -89,6 +89,9 @@ public class ShortcutActivity extends Activity implements OnCancelListener, OnDi
      */
     @Override
     protected void onCreate(Bundle state) {
+        if (RequestPermissionsActivity.startPermissionActivity(this)) {
+            finish();
+        }
         if (DEBUG) {
             Log.d(TAG, "ShortcutActivity.onCreate"); //$NON-NLS-1$
         }
