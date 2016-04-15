@@ -12,13 +12,14 @@
  ** distributed under the License is distributed on an "AS IS" BASIS,
  ** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  ** See the License for the specific language governing permissions and
- ** limitations under the License.-->
+ ** limitations under the License.
+ -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
   <!-- The default progress value -->
   <integer name="default_progress_value">0</integer>
 
   <!-- The default grid columns value -->
-  <integer name="default_grid_columns">5</integer>
+  <integer name="default_grid_columns">3</integer>
 
 </resources>
