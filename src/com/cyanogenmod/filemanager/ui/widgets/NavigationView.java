@@ -23,6 +23,8 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.os.storage.StorageVolume;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -39,6 +41,7 @@ import android.widget.Toast;
 
 import com.cyanogenmod.filemanager.FileManagerApplication;
 import com.cyanogenmod.filemanager.R;
+import com.cyanogenmod.filemanager.activities.NavigationActivity;
 import com.cyanogenmod.filemanager.adapters.FileSystemObjectAdapter;
 import com.cyanogenmod.filemanager.adapters.FileSystemObjectAdapter.OnSelectionChangedListener;
 import com.cyanogenmod.filemanager.console.CancelledOperationException;
@@ -90,6 +93,33 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
 
     private static final String TAG = "NavigationView"; //$NON-NLS-1$
     private ProgressDialog mLoadingDialog = null;
+    private NavigationRefreshHandler mHandler;
+    private static final int REFRESH_UI = 1;
+    private static final int REFRESH_UI_DELAY = 700;
+
+    private class NavigationRefresh implements
+            NavigationActivity.INotifyRefresh {
+        @Override
+        public void refreshUi() {
+            mHandler.sendEmptyMessageDelayed(REFRESH_UI, REFRESH_UI_DELAY);
+        }
+    }
+
+    private class NavigationRefreshHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case REFRESH_UI:
+                if (mAdapter != null) {
+                    mAdapter.notifyDataSetChanged();
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
     /**
      * An interface to communicate selection changes events.
      */
@@ -471,6 +501,9 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
         } finally {
             a.recycle();
         }
+        mHandler = new NavigationRefreshHandler();
+        ((NavigationActivity) context)
+                .setNotifyView(new NavigationRefresh());
     }
 
     /**

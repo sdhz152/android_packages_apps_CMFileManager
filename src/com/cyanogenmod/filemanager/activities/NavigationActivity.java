@@ -505,6 +505,15 @@ public class NavigationActivity extends Activity
 
     private AsyncTask<Void, Void, Boolean> mBookmarksTask;
     private AsyncTask<Void, Void, Boolean> mHistoryTask;
+    private INotifyRefresh mINotifyRefresh;
+
+    public interface INotifyRefresh {
+        void refreshUi();
+    }
+
+    public void setNotifyView(INotifyRefresh iNotifyRefresh) {
+        mINotifyRefresh = iNotifyRefresh;
+    }
 
     /**
      * {@inheritDoc}
@@ -751,6 +760,12 @@ public class NavigationActivity extends Activity
 
         //All destroy. Continue
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mINotifyRefresh.refreshUi();
     }
 
     /**
