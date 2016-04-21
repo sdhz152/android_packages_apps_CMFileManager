@@ -45,7 +45,7 @@ public final class MountPointHelper {
                                                 "tmpfs" //$NON-NLS-1$
                                                     });
 
-    private static final long MAX_CACHED_TIME = 60000L * 5;
+    private static final long MAX_CACHED_TIME = 15000;
 
     private static List<MountPoint> sMountPoints;
     private static long sLastCachedTime;
@@ -94,7 +94,7 @@ public final class MountPointHelper {
             // For non-rooted devices, which console is java and runs under a chrooted
             // device, mount point info mustn't be a main objective. Caching the status
             // should be enough and operation runs smoothly.
-            // Refresh mount points after some time (5 minutes should be enough)
+            // Refresh mount points after some time (15 s should be enough)
             long now = System.currentTimeMillis();
             if (sMountPoints == null || (now - sLastCachedTime) > MAX_CACHED_TIME ||
                 FileManagerApplication.hasShellCommands()) {
