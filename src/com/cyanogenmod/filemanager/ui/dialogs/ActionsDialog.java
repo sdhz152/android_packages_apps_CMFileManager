@@ -263,6 +263,7 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
 
             //- Delete
             case R.id.mnu_actions_delete:
+                deleteInitialDir(this.mFso);
                 DeleteActionPolicy.removeFileSystemObject(
                         this.mContext,
                         this.mFso,
@@ -378,6 +379,11 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
                 if (this.mOnSelectionListener != null) {
                     List<FileSystemObject> selection =
                             this.mOnSelectionListener.onRequestSelectedFiles();
+                    for (FileSystemObject fileSystemObject : selection) {
+                        if (deleteInitialDir(fileSystemObject)) {
+                            break;
+                        }
+                    }
                     DeleteActionPolicy.removeFileSystemObjects(
                             this.mContext,
                             selection,
@@ -504,6 +510,24 @@ public class ActionsDialog implements OnItemClickListener, OnItemLongClickListen
 
         //Dismiss the dialog
         this.mDialog.dismiss();
+    }
+
+    /**
+     * Method remove initial_dir from SharedPreference when delete file and the
+     * file from SharedPreference is same .
+     *
+     * @param theobject to delete.
+     */
+    private boolean deleteInitialDir(FileSystemObject fileSystemObject) {
+        String initialDir = Preferences.getSharedPreferences().getString(
+                FileManagerSettings.SETTINGS_INITIAL_DIR.getId(), null);
+        String deleteFilePath = fileSystemObject.getFullPath();
+        if (deleteFilePath != null && deleteFilePath.equals(initialDir)) {
+            Preferences.getSharedPreferences().edit()
+                    .remove(FileManagerSettings.SETTINGS_INITIAL_DIR.getId()).commit();
+            return true;
+        }
+        return false;
     }
 
     /**
