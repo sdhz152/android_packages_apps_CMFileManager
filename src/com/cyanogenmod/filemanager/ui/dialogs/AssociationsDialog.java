@@ -216,16 +216,6 @@ public class AssociationsDialog implements OnItemClickListener {
             deselectAll();
             ((ViewGroup)view).setSelected(true);
 
-            // Internal editors can be associated
-            boolean isPlatformSigned = AndroidHelper.isAppPlatformSignature(this.mContext);
-            if (isPlatformSigned && this.mAllowPreferred) {
-                ResolveInfo ri = getSelected();
-                this.mRemember.setVisibility(
-                        IntentsActionPolicy.isInternalEditor(ri) ?
-                               View.INVISIBLE :
-                               View.VISIBLE);
-            }
-
             // Enable action button
             this.mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
         }
@@ -362,10 +352,8 @@ public class AssociationsDialog implements OnItemClickListener {
 
             // Associate the activity under these circumstances:
             //  - The user has selected the remember option
-            //  - The selected intent is not an internal editor (internal editors are private and
-            //    can be associated)
             //  - The selected intent is not the current preferred selection
-            if (remember && !IntentsActionPolicy.isInternalEditor(ri) && !isPreferredSelected()) {
+            if (remember && !isPreferredSelected()) {
 
                 // Build a reasonable intent filter, based on what matched.
                 IntentFilter filter = new IntentFilter();

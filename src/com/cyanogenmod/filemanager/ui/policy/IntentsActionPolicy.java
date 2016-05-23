@@ -690,7 +690,6 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         int cc = info.size();
         for (int i = 0; i < cc; i++) {
             ResolveInfo ri = info.get(i);
-            if (isInternalEditor(ri)) continue;
             if (ri.activityInfo == null || ri.activityInfo.packageName == null) continue;
             List<ComponentName> prefActList = new ArrayList<ComponentName>();
             List<IntentFilter> intentList = new ArrayList<IntentFilter>();
