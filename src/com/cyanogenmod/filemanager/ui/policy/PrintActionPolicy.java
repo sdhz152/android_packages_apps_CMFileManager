@@ -228,17 +228,27 @@ public final class PrintActionPolicy extends ActionsPolicy {
                     pdfDocument.finishPage(page);
                 }
 
-                try {
-                    // Write the document
-                    pdfDocument.writeTo(new FileOutputStream(destination.getFileDescriptor()));
+                final PrintedPdfDocument ppd = pdfDocument;
+                final WriteResultCallback cb = callback;
+                final ParcelFileDescriptor des = destination;
 
-                    // Done
-                    callback.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
-                } catch (IOException ioe) {
-                    // Failed.
-                    ExceptionUtil.translateException(mCtx, ioe);
-                    callback.onWriteFailed("Failed to print image");
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // Write the document
+                            ppd.writeTo(new FileOutputStream(des.getFileDescriptor()));
+
+                            // Done
+                            cb.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
+                        } catch (IOException ioe) {
+                            // Failed.
+                            ExceptionUtil.translateException(mCtx, ioe);
+                            cb.onWriteFailed("Failed to print image");
+                        }
+                    }
+                }).start();
+
             } finally {
                 if (destination != null) {
                     try {
