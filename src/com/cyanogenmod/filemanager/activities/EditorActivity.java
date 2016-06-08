@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -782,7 +783,11 @@ public class EditorActivity extends Activity implements TextWatcher {
         this.mNoWordWrapView = (ViewGroup)findViewById(R.id.editor_no_word_wrap_view);
         this.mWordWrapView.setVisibility(View.VISIBLE);
         this.mNoWordWrapView.setVisibility(View.GONE);
-
+        Point outSize = new Point();
+        getWindowManager().getDefaultDisplay().getSize(outSize);
+        int paddingLeft = this.mNoWordWrapView.getPaddingLeft();
+        int paddingRight = this.mNoWordWrapView.getPaddingRight();
+        this.mEditor.setMinimumWidth(outSize.x - paddingLeft - paddingRight);
         this.mBinaryEditor = (ListView)findViewById(R.id.editor_binary);
 
         this.mNoSuggestions = false;
