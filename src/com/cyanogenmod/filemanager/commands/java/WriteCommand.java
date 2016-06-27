@@ -106,7 +106,7 @@ public class WriteCommand extends Program implements WriteExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         synchronized (this.mSync) {
             this.mReady = true;

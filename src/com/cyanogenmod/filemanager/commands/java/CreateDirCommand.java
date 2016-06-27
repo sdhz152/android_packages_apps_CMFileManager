@@ -59,7 +59,7 @@ public class CreateDirCommand extends Program implements CreateDirExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,

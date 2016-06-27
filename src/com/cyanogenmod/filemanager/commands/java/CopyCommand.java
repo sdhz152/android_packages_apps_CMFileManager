@@ -64,7 +64,7 @@ public class CopyCommand extends Program implements CopyExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException,
                    CancelledOperationException {
         if (isTrace()) {

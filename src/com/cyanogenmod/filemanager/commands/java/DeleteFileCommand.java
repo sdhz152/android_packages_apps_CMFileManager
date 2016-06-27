@@ -59,7 +59,7 @@ public class DeleteFileCommand extends Program implements DeleteFileExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,

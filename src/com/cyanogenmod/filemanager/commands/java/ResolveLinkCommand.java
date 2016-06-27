@@ -61,7 +61,7 @@ public class ResolveLinkCommand extends Program implements ResolveLinkExecutable
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,

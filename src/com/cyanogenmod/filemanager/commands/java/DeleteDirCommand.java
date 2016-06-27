@@ -60,7 +60,7 @@ public class DeleteDirCommand extends Program implements DeleteDirExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,

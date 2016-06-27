@@ -79,7 +79,7 @@ public class FindCommand extends Program implements FindExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,
