@@ -502,8 +502,8 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
             a.recycle();
         }
         mHandler = new NavigationRefreshHandler();
-        ((NavigationActivity) context)
-                .setNotifyView(new NavigationRefresh());
+       if(context instanceof NavigationActivity)
+        ((NavigationActivity) context).setNotifyView(new NavigationRefresh());
     }
 
     /**
