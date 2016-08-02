@@ -2631,11 +2631,15 @@ public class NavigationActivity extends Activity
                     String p0 = fso.getFullPath();
                     String p1 = ((NavigationViewInfoParcelable) history.getItem()).getCurrentDir();
                     if (p0.compareTo(p1) == 0) {
-                        this.mHistory.remove(i);
-                        mDrawerHistory.removeViewAt(mDrawerHistory.getChildCount() - i - 1);
-                        mDrawerHistoryEmpty.setVisibility(
-                                mDrawerHistory.getChildCount() == 0 ? View.VISIBLE : View.GONE);
-                        updateHistoryPositions();
+                        try {
+                            this.mHistory.remove(i);
+                            mDrawerHistory.removeViewAt(mDrawerHistory.getChildCount() - i - 1);
+                            mDrawerHistoryEmpty.setVisibility(
+                                    mDrawerHistory.getChildCount() == 0 ? View.VISIBLE : View.GONE);
+                            updateHistoryPositions();
+                        } catch (Exception e) {
+                            Log.e(TAG, "Remove failed: " + e);
+                        }
                     }
                 }
             }
