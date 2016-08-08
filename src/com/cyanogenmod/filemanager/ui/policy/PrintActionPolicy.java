@@ -187,77 +187,75 @@ public final class PrintActionPolicy extends ActionsPolicy {
                 CancellationSignal cancellationSignal, WriteResultCallback callback) {
             PrintedPdfDocument pdfDocument = new PrintedPdfDocument(mCtx,
                     mAttributes);
-            try {
-                Rect pageContentRect = getContentRect(mAttributes);
-                int charsPerRow = (int) (pageContentRect.width() / mTextBounds.width());
-                int rowsPerPage = rowsPerPage(pageContentRect);
 
-                int currentPage = 0;
-                int currentLine = 0;
-                Page page = null;
-                if (mAdjustedLines.size() > 0) {
+            Rect pageContentRect = getContentRect(mAttributes);
+            int charsPerRow = (int) (pageContentRect.width() / mTextBounds.width());
+            int rowsPerPage = rowsPerPage(pageContentRect);
+
+            int currentPage = 0;
+            int currentLine = 0;
+            Page page = null;
+            if (mAdjustedLines.size() > 0) {
+                page = pdfDocument.startPage(currentPage++);
+                printHeader(mCtx, page, pageContentRect, charsPerRow);
+            }
+            // Top (with margin) + header
+            float top = pageContentRect.top + (mTextBounds.height() * 2);
+            for (String line : mAdjustedLines) {
+                currentLine++;
+                page.getCanvas().drawText(line, pageContentRect.left,
+                        top + (currentLine * mTextBounds.height()), mPaint);
+
+                if (currentLine >= rowsPerPage) {
+                    if (page != null) {
+                        printFooter(mCtx, page, pageContentRect, currentPage);
+                        pdfDocument.finishPage(page);
+                    }
+                    currentLine = 0;
                     page = pdfDocument.startPage(currentPage++);
                     printHeader(mCtx, page, pageContentRect, charsPerRow);
                 }
-                // Top (with margin) + header
-                float top = pageContentRect.top + (mTextBounds.height() * 2);
-                for (String line : mAdjustedLines) {
-                    currentLine++;
-                    page.getCanvas().drawText(line, pageContentRect.left,
-                            top + (currentLine * mTextBounds.height()), mPaint);
-
-                    if (currentLine >= rowsPerPage) {
-                        if (page != null) {
-                            printFooter(mCtx, page, pageContentRect, currentPage);
-                            pdfDocument.finishPage(page);
-                        }
-                        currentLine = 0;
-                        page = pdfDocument.startPage(currentPage++);
-                        printHeader(mCtx, page, pageContentRect, charsPerRow);
-                    }
-                }
-
-                // Finish the last page
-                if (page != null) {
-                    printFooter(mCtx, page, pageContentRect, currentPage);
-                    pdfDocument.finishPage(page);
-                } else {
-                    page = pdfDocument.startPage(1);
-                    printHeader(mCtx, page, pageContentRect, charsPerRow);
-                    printFooter(mCtx, page, pageContentRect, currentPage);
-                    pdfDocument.finishPage(page);
-                }
-
-                final PrintedPdfDocument ppd = pdfDocument;
-                final WriteResultCallback cb = callback;
-                final ParcelFileDescriptor des = destination;
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            // Write the document
-                            ppd.writeTo(new FileOutputStream(des.getFileDescriptor()));
-
-                            // Done
-                            cb.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
-                        } catch (IOException ioe) {
-                            // Failed.
-                            ExceptionUtil.translateException(mCtx, ioe);
-                            cb.onWriteFailed("Failed to print image");
-                        }
-                    }
-                }).start();
-
-            } finally {
-                if (destination != null) {
-                    try {
-                        destination.close();
-                    } catch (IOException ioe) {
-                        /* ignore */
-                    }
-                }
             }
+
+            // Finish the last page
+            if (page != null) {
+                printFooter(mCtx, page, pageContentRect, currentPage);
+                pdfDocument.finishPage(page);
+            } else {
+                page = pdfDocument.startPage(1);
+                printHeader(mCtx, page, pageContentRect, charsPerRow);
+                printFooter(mCtx, page, pageContentRect, currentPage);
+                pdfDocument.finishPage(page);
+            }
+
+            final PrintedPdfDocument ppd = pdfDocument;
+            final WriteResultCallback cb = callback;
+            final ParcelFileDescriptor des = destination;
+
+            new Thread(new Runnable() {
+               @Override
+                public void run() {
+                    try {
+                        // Write the document
+                        ppd.writeTo(new FileOutputStream(des.getFileDescriptor()));
+
+                        // Done
+                        cb.onWriteFinished(new PageRange[]{PageRange.ALL_PAGES});
+                    } catch (IOException ioe) {
+                        // Failed.
+                        ExceptionUtil.translateException(mCtx, ioe);
+                        cb.onWriteFailed("Failed to print image");
+                    } finally {
+                        if (des != null) {
+                            try {
+                                des.close();
+                            } catch (IOException ioe) {
+                                /* ignore */
+                            }
+                        }
+                    }
+                }
+            }).start();
         }
 
         @Override
