@@ -28,7 +28,9 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.Manifest.permission;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -69,6 +71,7 @@ import com.cyanogenmod.filemanager.util.StorageHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -120,6 +123,10 @@ public class PickerActivity extends Activity
     private static final String FILE_URI_SCHEME = "file"; //$NON-NLS-1$
     private static final String FOLDER_URI_SCHEME = "folder"; //$NON-NLS-1$
     private static final String DIRECTORY_URI_SCHEME = "directory"; //$NON-NLS-1$
+    private final int REQUEST_ALL_PERMISSIONS = 1;
+    private final String[] REQUIRED_PERMISSIONS = new String[] {
+            permission.READ_EXTERNAL_STORAGE,
+            permission.WRITE_EXTERNAL_STORAGE };
 
     FileSystemObject mFso;  // The picked item
     FileSystemObject mCurrentDirectory;
@@ -136,27 +143,12 @@ public class PickerActivity extends Activity
      */
     @Override
     protected void onCreate(Bundle state) {
-        if (RequestPermissionsActivity.startPermissionActivity(this)) {
-            finish();
-        }
-        if (DEBUG) {
-            Log.d(TAG, "PickerActivity.onCreate"); //$NON-NLS-1$
-        }
-
-        // Register the broadcast receiver
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(FileManagerSettings.INTENT_THEME_CHANGED);
-        registerReceiver(this.mNotificationReceiver, filter);
-
-        // Set the theme before setContentView
-        Theme theme = ThemeManager.getCurrentTheme(this);
-        theme.setBaseTheme(this, true);
-
-        // Initialize the activity
-        init();
-
-        //Save state
         super.onCreate(state);
+        if (checkAllNeedPermissions(REQUIRED_PERMISSIONS)) {
+            createContinue();
+        } else {
+            requestPermissions();
+        }
     }
 
     /**
@@ -186,6 +178,71 @@ public class PickerActivity extends Activity
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         measureHeight();
+    }
+    private boolean checkAllNeedPermissions(String[] permissions) {
+        for (String permission : permissions) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+            String[] permissions, int[] grantedResults) {
+        if (requestCode == REQUEST_ALL_PERMISSIONS && permissions != null && permissions.length > 0
+                && arePermissionsGranted(permissions, grantedResults)) {
+            createContinue();
+        } else {
+            Toast.makeText(this, R.string.on_permission_read_filemanager,
+                Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
+    private boolean arePermissionsGranted(String permissions[], int[] grantResult) {
+        for (int i = 0; i < permissions.length; i++) {
+            if (grantResult[i] != PackageManager.PERMISSION_GRANTED
+                    && Arrays.asList(REQUIRED_PERMISSIONS).contains(permissions[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void requestPermissions() {
+        final ArrayList<String> noGrantedPermissions = new ArrayList<>();
+        for (String permission : REQUIRED_PERMISSIONS) {
+            if (checkSelfPermission(permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                noGrantedPermissions.add(permission);
+            }
+        }
+        if (noGrantedPermissions.size() == 0) {
+            Log.e(TAG, "Request permission activity was called even"
+                    + " though all permissions are satisfied.");
+        }
+        requestPermissions(noGrantedPermissions.toArray(new String[noGrantedPermissions.size()]),
+                REQUEST_ALL_PERMISSIONS);
+    }
+
+    private void createContinue() {
+        if (DEBUG) {
+            Log.d(TAG, "PickerActivity.onCreate"); //$NON-NLS-1$
+        }
+
+        // Register the broadcast receiver
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(FileManagerSettings.INTENT_THEME_CHANGED);
+        registerReceiver(this.mNotificationReceiver, filter);
+
+        // Set the theme before setContentView
+        Theme theme = ThemeManager.getCurrentTheme(this);
+        theme.setBaseTheme(this, true);
+
+        // Initialize the activity
+        init();
     }
 
     /**
