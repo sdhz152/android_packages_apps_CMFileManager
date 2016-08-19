@@ -451,6 +451,7 @@ public class PickerActivity extends Activity
             // Return the picked file, as expected (this activity should fill the intent data
             // and return RESULT_OK result)
             Intent result = new Intent();
+            result.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             result.setData(getResultUriForFileFromIntent(this, src, getIntent()));
             setResult(Activity.RESULT_OK, result);
             finish();
