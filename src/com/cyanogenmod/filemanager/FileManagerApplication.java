@@ -564,13 +564,12 @@ public final class FileManagerApplication extends Application {
         try {
             String rootCommand = getString(R.string.root_command);
             File cmd = new File(rootCommand);
-            if (!cmd.exists() || !cmd.isFile()) {
+            if (!cmd.exists()) {
                 Log.w(TAG,
                         String.format(
-                                "Command %s not found. Exists: %s; IsFile: %s.", //$NON-NLS-1$
+                                "Command %s not found. Exists: %s.", //$NON-NLS-1$
                                 rootCommand,
-                                String.valueOf(cmd.exists()),
-                                String.valueOf(cmd.isFile())));
+                                String.valueOf(cmd.exists())));
                 return false;
             }
             return true;
