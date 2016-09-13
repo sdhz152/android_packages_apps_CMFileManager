@@ -73,7 +73,7 @@ public class ChecksumCommand extends Program implements ChecksumExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute() throws InsufficientPermissionsException,
+    public synchronized void execute() throws InsufficientPermissionsException,
         NoSuchFileOrDirectory, ExecutionException {
 
         if (isTrace()) {

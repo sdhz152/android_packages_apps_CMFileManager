@@ -81,7 +81,7 @@ public class FolderUsageCommand extends Program implements FolderUsageExecutable
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
         if (isTrace()) {
             Log.v(TAG,

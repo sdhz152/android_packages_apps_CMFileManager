@@ -75,7 +75,7 @@ public class DiskUsageCommand extends Program implements DiskUsageExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
 
         if (isTrace()) {

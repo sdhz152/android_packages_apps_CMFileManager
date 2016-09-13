@@ -64,7 +64,7 @@ public class MoveCommand extends Program implements MoveExecutable {
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException,
                    CancelledOperationException {
         if (isTrace()) {

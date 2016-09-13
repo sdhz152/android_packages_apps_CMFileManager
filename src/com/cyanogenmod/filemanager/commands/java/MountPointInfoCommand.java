@@ -65,7 +65,7 @@ public class MountPointInfoCommand extends Program implements MountPointInfoExec
      * {@inheritDoc}
      */
     @Override
-    public void execute()
+    public synchronized void execute()
             throws InsufficientPermissionsException, NoSuchFileOrDirectory, ExecutionException {
 
         if (isTrace()) {

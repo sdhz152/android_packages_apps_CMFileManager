@@ -78,7 +78,7 @@ public final class JavaConsole extends VirtualConsole {
      * {@inheritDoc}
      */
     @Override
-    public synchronized void execute(Executable executable, Context ctx)
+    public void execute(Executable executable, Context ctx)
             throws ConsoleAllocException, InsufficientPermissionsException, NoSuchFileOrDirectory,
                 OperationTimeoutException, ExecutionException, CommandNotFoundException,
                    CancelledOperationException, ReadOnlyFilesystemException {
