@@ -44,6 +44,7 @@ import com.cyanogenmod.filemanager.util.AIDHelper;
 import com.cyanogenmod.filemanager.util.AndroidHelper;
 import com.cyanogenmod.filemanager.util.MimeTypeHelper;
 import com.cyanogenmod.filemanager.util.StorageHelper;
+import com.cyanogenmod.filemanager.util.AppDirNameHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -179,6 +180,8 @@ public final class FileManagerApplication extends Application {
         }
         init();
         register();
+        AppDirNameHelper appDirNameHelper = new AppDirNameHelper(getApplicationContext());
+        appDirNameHelper.setDirCnNameMap();
 
         // Kick off usage by mime type indexing for external storage; most likely use case for
         // file manager
