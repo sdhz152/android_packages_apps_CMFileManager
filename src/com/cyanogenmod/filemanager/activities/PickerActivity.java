@@ -402,6 +402,7 @@ public class PickerActivity extends Activity
      * @hide
      */
     void measureHeight() {
+        if (this.mRootView == null) return;// if mRootView is null then is requesting permission.
         // Calculate the dialog size based on the window height
         DisplayMetrics displaymetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
