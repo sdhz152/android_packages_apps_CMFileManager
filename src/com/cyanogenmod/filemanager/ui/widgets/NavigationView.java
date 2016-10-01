@@ -1221,23 +1221,27 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         // Different actions depending on user preference
+        try {
+            // Get the adapter and the fso
+            FileSystemObjectAdapter adapter = ((FileSystemObjectAdapter)parent.getAdapter());
+            FileSystemObject fso = adapter.getItem(position);
 
-        // Get the adapter and the fso
-        FileSystemObjectAdapter adapter = ((FileSystemObjectAdapter)parent.getAdapter());
-        FileSystemObject fso = adapter.getItem(position);
+            // Parent directory hasn't actions
+            if (fso instanceof ParentDirectory) {
+                return false;
+            }
 
-        // Parent directory hasn't actions
-        if (fso instanceof ParentDirectory) {
+            // Pick mode doesn't implements the onlongclick
+            if (this.mNavigationMode.compareTo(NAVIGATION_MODE.PICKABLE) == 0) {
+                return false;
+            }
+
+            onRequestMenu(fso);
+            return true; //Always consume the event
+        } catch (IndexOutOfBoundsException e) {
+            Log.e(TAG, "File is not in adapter: " + e);
             return false;
         }
-
-        // Pick mode doesn't implements the onlongclick
-        if (this.mNavigationMode.compareTo(NAVIGATION_MODE.PICKABLE) == 0) {
-            return false;
-        }
-
-        onRequestMenu(fso);
-        return true; //Always consume the event
     }
 
     /**
