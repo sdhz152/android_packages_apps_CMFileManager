@@ -162,10 +162,12 @@ public class SearchActivity extends Activity
                                         SETTINGS_SORT_SEARCH_RESULTS_MODE.getId()) == 0)) {
 
                             // Recreate the adapter
-                            int pos = SearchActivity.
+                            if (mAdapter != null) {
+                                int pos = SearchActivity.
                                         this.mSearchListView.getFirstVisiblePosition();
-                            mAdapter.notifyDataSetChanged();
-                            SearchActivity.this.mSearchListView.setSelection(pos);
+                                mAdapter.notifyDataSetChanged();
+                                SearchActivity.this.mSearchListView.setSelection(pos);
+                            }
                             return;
                         }
                     }
