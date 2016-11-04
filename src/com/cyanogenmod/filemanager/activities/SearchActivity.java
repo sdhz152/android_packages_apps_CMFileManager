@@ -786,12 +786,14 @@ public class SearchActivity extends Activity
                     Html.fromHtml(getString(R.string.search_terms, query.getTerms())));
         } else {
             ArrayList<String> localizedNames = new ArrayList<String>(mMimeTypeCategories.size());
-            for (MimeTypeCategory category : mMimeTypeCategories) {
-                localizedNames
-                        .add(NavigationActivity.MIME_TYPE_LOCALIZED_NAMES[category.ordinal()]);
+            if (localizedNames != null) {
+                for (MimeTypeCategory category : mMimeTypeCategories) {
+                    localizedNames
+                            .add(NavigationActivity.MIME_TYPE_LOCALIZED_NAMES[category.ordinal()]);
+                }
+                this.mSearchTerms.setText(
+                         Html.fromHtml(getString(R.string.search_terms, localizedNames)));
             }
-             this.mSearchTerms.setText(
-                     Html.fromHtml(getString(R.string.search_terms, localizedNames)));
         }
 
         //Now, do the search in background
