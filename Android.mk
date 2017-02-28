@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+ifneq ($(TARGET_USES_AOSP),true)
+
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -44,3 +46,5 @@ LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_MULTI_PREBUILT)
 include $(call all-makefiles-under,$(LOCAL_PATH))
+
+endif #TARGET_USES_AOSP

@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+ifneq ($(TARGET_USES_AOSP),true)
+
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -36,3 +38,5 @@ LOCAL_INSTRUMENTATION_FOR := CMFileManager
 LOCAL_PROGUARD_FLAG_FILES := proguard.flags
 
 include $(BUILD_PACKAGE)
+
+endif #TARGET_USES_AOSP
