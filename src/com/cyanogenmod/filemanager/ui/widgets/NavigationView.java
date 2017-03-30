@@ -1468,7 +1468,7 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
         StorageVolume[] volumes =
                 StorageHelper.getStorageVolumes(getContext(), false);
         if (volumes != null && volumes.length > 0) {
-            changeCurrentDir(volumes[0].getPath(), false, true, false, null, null);
+            changeCurrentDir(StorageHelper.getPathReflect(volumes[0]), false, true, false, null, null);
         }
     }
 
@@ -1499,7 +1499,7 @@ BreadcrumbListener, OnSelectionChangedListener, OnSelectionListener, OnRequestRe
         if (!StorageHelper.isPathInStorageVolume(newDir)) {
             StorageVolume[] volumes = StorageHelper.getStorageVolumes(getContext(), false);
             if (volumes != null && volumes.length > 0) {
-                return volumes[0].getPath();
+                return StorageHelper.getPathReflect(volumes[0]);
             }
         }
         return newDir;

@@ -144,9 +144,10 @@ public final class Preferences {
 
     private static File getWorldReadablePropertiesFile(Context context) {
         String dataDir = context.getApplicationInfo().dataDir;
+        final int PER_USER_RANGE = 100000;
         if (AndroidHelper.isSecondaryUser(context)) {
-            dataDir = dataDir.replace(String.valueOf(UserHandle.myUserId()),
-                    String.valueOf(UserHandle.USER_OWNER));
+            dataDir = dataDir.replace(String.valueOf(android.os.Process.myUid()/PER_USER_RANGE),
+                    String.valueOf(0));
         }
         return new File(dataDir, SHARED_PROPERTIES_FILENAME);
     }

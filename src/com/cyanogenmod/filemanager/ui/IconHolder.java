@@ -40,6 +40,7 @@ import com.cyanogenmod.filemanager.util.MediaHelper;
 import com.cyanogenmod.filemanager.util.MimeTypeHelper.KnownMimeTypeResolver;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.WeakHashMap;
@@ -54,6 +55,7 @@ public class IconHolder {
 
     private static final int MSG_LOAD = 1;
     private static final int MSG_LOADED = 2;
+    private static final int TARGET_SIZE_MICRO_THUMBNAIL = 96;
 
     private final Map<String, Drawable> mIcons;     // Themes based
     private final Map<String, Drawable> mAppIcons;  // App based
@@ -113,7 +115,7 @@ public class IconHolder {
             } else if (KnownMimeTypeResolver.isImage(mContext, fso)) {
                 return getImageDrawable(filePath);
             } else if (KnownMimeTypeResolver.isVideo(mContext, fso)) {
-                return getVideoDrawable(filePath);
+                return getImageDrawable(filePath);
             } else if (FileHelper.isDirectory(fso)) {
                 Map<String, Long> albums = getAlbums(mContext);
                 if (albums.containsKey(filePath)) {
@@ -146,6 +148,16 @@ public class IconHolder {
             return null;
         }
 
+        private Bitmap getBitmapByReflect(String file) {
+            try {
+                Class cls = Class.forName("android.media.ThumbnailUtils");
+                Method m = cls.getMethod("createImageThumbnail", new Class[]{String.class, int.class});
+                return (Bitmap)m.invoke(null, new Object[]{new String(file), new Integer(TARGET_SIZE_MICRO_THUMBNAIL)});
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
         /**
          * Method that returns a thumbnail of the picture
          *
@@ -153,25 +165,10 @@ public class IconHolder {
          * @return Drawable The drawable or null if cannot be extracted
          */
         private Drawable getImageDrawable(String file) {
-            Bitmap thumb = ThumbnailUtils.createImageThumbnail(
-                    MediaHelper.normalizeMediaPath(file),
-                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL);
-            if (thumb == null) {
-                return null;
-            }
-            return new BitmapDrawable(mContext.getResources(), thumb);
-        }
-
-        /**
-         * Method that returns a thumbnail of the video
-         *
-         * @param file The path to the file
-         * @return Drawable The drawable or null if cannot be extracted
-         */
-        private Drawable getVideoDrawable(String file) {
-            Bitmap thumb = ThumbnailUtils.createVideoThumbnail(
-                    MediaHelper.normalizeMediaPath(file),
-                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL);
+            Bitmap thumb = getBitmapByReflect(MediaHelper.normalizeMediaPath(file));
+                    //ThumbnailUtils.createImageThumbnail(
+                    //MediaHelper.normalizeMediaPath(file),
+                    //TARGET_SIZE_MICRO_THUMBNAIL);
             if (thumb == null) {
                 return null;
             }
@@ -189,8 +186,9 @@ public class IconHolder {
             if (path == null) {
                 return null;
             }
-            Bitmap thumb = ThumbnailUtils.createImageThumbnail(path,
-                    ThumbnailUtils.TARGET_SIZE_MICRO_THUMBNAIL);
+            Bitmap thumb = getBitmapByReflect(path);
+                    //ThumbnailUtils.createImageThumbnail(path,
+                    //TARGET_SIZE_MICRO_THUMBNAIL);
             if (thumb == null) {
                 return null;
             }

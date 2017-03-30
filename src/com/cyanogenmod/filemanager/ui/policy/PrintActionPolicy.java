@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -283,7 +284,13 @@ public final class PrintActionPolicy extends ActionsPolicy {
                 .setContentType(PrintDocumentInfo.CONTENT_TYPE_DOCUMENT)
                 .setPageCount(calculatePageCount(rowsPerPage))
                 .build();
-            info.setDataSize(mDocument.getSize());
+            try {
+                Field f = info.getClass().getDeclaredField("mDataSize");
+                f.setAccessible(true);
+                f.set(info.getClass(), mDocument.getSize());
+            } catch (Exception ex) {
+                Log.e(TAG, ex.toString());
+            }
             boolean changed = !newAttributes.equals(oldAttributes);
             callback.onLayoutFinished(info, changed);
         }

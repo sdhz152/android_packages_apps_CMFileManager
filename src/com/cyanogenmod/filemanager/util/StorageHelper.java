@@ -19,7 +19,6 @@ import android.content.Context;
 import android.os.Environment;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import android.util.Log;
 
 import com.cyanogenmod.filemanager.FileManagerApplication;
 import com.cyanogenmod.filemanager.R;
@@ -53,10 +52,8 @@ public final class StorageHelper {
             //Use reflect to get this value (if possible)
             try {
                 StorageManager sm = (StorageManager) ctx.getSystemService(Context.STORAGE_SERVICE);
-                if (sm != null)
-                    sStorageVolumes = sm.getVolumeList();
-                else
-                    Log.e(TAG, "Unable to access Storage Manager");
+                Method method = sm.getClass().getMethod("getVolumeList");
+                sStorageVolumes = (StorageVolume[])method.invoke(sm);
             } catch (Exception ex) {
                 //Ignore. Android SDK StorageManager class doesn't have this method
                 //Use default android information from environment
@@ -104,7 +101,7 @@ public final class StorageHelper {
             return volume.getDescription(ctx);
         } catch (Throwable _throw) {
             // Returns the volume storage path
-            return volume.getPath();
+            return getPathReflect(volume);
         }
     }
 
@@ -122,13 +119,12 @@ public final class StorageHelper {
         int cc = volumes.length;
         for (int i = 0; i < cc; i++) {
             StorageVolume vol = volumes[i];
-            if (fso.startsWith(vol.getPath())) {
+            if (fso.startsWith(getPathReflect(vol))) {
                 return true;
             }
         }
         return false;
     }
-
     /**
      * Method that returns if the path is a storage volume
      *
@@ -143,7 +139,7 @@ public final class StorageHelper {
         for (int i = 0; i < cc; i++) {
             StorageVolume vol = volumes[i];
             String p = new File(path).getAbsolutePath();
-            String v = new File(vol.getPath()).getAbsolutePath();
+            String v = new File(getPathReflect(vol)).getAbsolutePath();
             if (p.compareTo(v) == 0) {
                 return true;
             }
@@ -165,12 +161,21 @@ public final class StorageHelper {
         for (int i = 0; i < cc; i++) {
             StorageVolume vol = volumes[i];
             File p = new File(path);
-            File v = new File(vol.getPath());
+            File v = new File(getPathReflect(vol));
             if (p.getAbsolutePath().startsWith(v.getAbsolutePath())) {
                 return v.getName() + path.substring(v.getAbsolutePath().length());
             }
         }
         return null;
+    }
+
+    public static String getPathReflect(StorageVolume vol) {
+        try {
+            Method method = vol.getClass().getMethod("getPath");
+            return (String)method.invoke(vol);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
 }

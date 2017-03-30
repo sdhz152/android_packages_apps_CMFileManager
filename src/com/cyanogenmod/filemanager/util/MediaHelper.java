@@ -254,6 +254,7 @@ public final class MediaHelper {
      * @return String The normalized media path
      */
     public static String normalizeMediaPath(String path) {
+        final int PER_USER_RANGE = 100000;
         // Retrieve all the paths and check that we have this environment vars
         if (TextUtils.isEmpty(EMULATED_STORAGE_SOURCE) ||
                 TextUtils.isEmpty(EMULATED_STORAGE_TARGET) ||
@@ -267,7 +268,7 @@ public final class MediaHelper {
         }
         // We need to convert EXTERNAL_STORAGE -> EMULATED_STORAGE_TARGET / userId
         if (path.startsWith(EXTERNAL_STORAGE)) {
-            final String userId = String.valueOf(UserHandle.myUserId());
+            final String userId = String.valueOf(android.os.Process.myUid()/PER_USER_RANGE);
             final String target = new File(EMULATED_STORAGE_TARGET, userId).getAbsolutePath();
             path = path.replace(EXTERNAL_STORAGE, target);
         }

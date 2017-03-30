@@ -27,10 +27,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.internal.view.menu.MenuBuilder;
 import com.cyanogenmod.filemanager.R;
 import com.cyanogenmod.filemanager.ui.ThemeManager;
 import com.cyanogenmod.filemanager.ui.ThemeManager.Theme;
+
+import java.lang.reflect.Constructor;
 
 /**
  * An implementation of {@link BaseAdapter} that is associated with a
@@ -39,7 +40,7 @@ import com.cyanogenmod.filemanager.ui.ThemeManager.Theme;
 public class SimpleMenuListAdapter extends BaseAdapter {
     private final Context mContext;
     final LayoutInflater mInflater;
-    private final Menu mMenu;
+    private Menu mMenu;
     private boolean mMultiSelect;
 
     /**
@@ -52,9 +53,15 @@ public class SimpleMenuListAdapter extends BaseAdapter {
     public SimpleMenuListAdapter(Context context, int menuResourceId, boolean multiSelect) {
         super();
         this.mContext = context;
-        this.mMenu = new MenuBuilder(context);
         this.mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mMultiSelect = multiSelect;
+        try {
+            Class clazz = Class.forName("com.android.internal.view.menu.MenuBuilder");
+            Constructor c = clazz.getConstructor(Context.class);
+            this.mMenu = (Menu)c.newInstance(context);
+        } catch (Exception e) {
+            // catch errors here
+        }
         inflateMenu(menuResourceId);
     }
 

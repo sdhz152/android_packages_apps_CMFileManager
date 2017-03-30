@@ -58,7 +58,6 @@ import android.widget.TextView;
 import android.widget.TextView.BufferType;
 import android.widget.Toast;
 
-import com.android.internal.util.HexDump;
 import com.cyanogenmod.filemanager.R;
 import com.cyanogenmod.filemanager.activities.preferences.EditorPreferenceFragment;
 import com.cyanogenmod.filemanager.activities.preferences.EditorSHColorSchemePreferenceFragment;
@@ -1547,9 +1546,9 @@ public class EditorActivity extends Activity implements TextWatcher {
                 while ((read = bais.read(line, 0, DISPLAY_SIZE)) != -1) {
                     //offset   dump(16)   data\n
                     String linedata = new String(line, 0, read);
-                    sb.append(HexDump.toHexString(offset));
+                    sb.append(StringHelper.toHexString(offset));
                     sb.append(" "); //$NON-NLS-1$
-                    String hexDump = HexDump.toHexString(line, 0, read);
+                    String hexDump = StringHelper.toHexString(line, 0, read);
                     if (hexDump.length() != (DISPLAY_SIZE * 2)) {
                         char[] array = new char[(DISPLAY_SIZE * 2) - hexDump.length()];
                         Arrays.fill(array, ' ');

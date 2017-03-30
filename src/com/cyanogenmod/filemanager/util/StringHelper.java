@@ -18,8 +18,6 @@ package com.cyanogenmod.filemanager.util;
 
 import android.text.TextUtils;
 
-import com.android.internal.util.HexDump;
-
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.UUID;
@@ -30,6 +28,8 @@ import java.util.UUID;
 public final class StringHelper {
 
     private static final char[] VALID_NON_PRINTABLE_CHARS = {' ', '\t', '\r', '\n'};
+    private final static char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    private final static char[] HEX_LOWER_CASE_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     /**
      * Method that check if a character is valid printable character
@@ -110,9 +110,9 @@ public final class StringHelper {
         while ((read = bais.read(line, 0, DISPLAY_SIZE)) != -1) {
             //offset   dump(16)   data\n
             String linedata = new String(line, 0, read);
-            sb.append(HexDump.toHexString(offset));
+            sb.append(toHexString(offset));
             sb.append(" "); //$NON-NLS-1$
-            String hexDump = HexDump.toHexString(line, 0, read);
+            String hexDump = toHexString(line, 0, read);
             if (hexDump.length() != (DISPLAY_SIZE * 2)) {
                 char[] array = new char[(DISPLAY_SIZE * 2) - hexDump.length()];
                 Arrays.fill(array, ' ');
@@ -126,5 +126,65 @@ public final class StringHelper {
         }
 
         return sb.toString();
+    }
+
+    public static byte[] toByteArray(byte b)
+    {
+        byte[] array = new byte[1];
+        array[0] = b;
+        return array;
+    }
+
+    public static byte[] toByteArray(int i)
+    {
+        byte[] array = new byte[4];
+
+        array[3] = (byte)(i & 0xFF);
+        array[2] = (byte)((i >> 8) & 0xFF);
+        array[1] = (byte)((i >> 16) & 0xFF);
+        array[0] = (byte)((i >> 24) & 0xFF);
+
+        return array;
+    }
+
+    public static String toHexString(byte b)
+    {
+        return toHexString(toByteArray(b));
+    }
+
+    public static String toHexString(byte[] array)
+    {
+        return toHexString(array, 0, array.length, true);
+    }
+
+    public static String toHexString(byte[] array, boolean upperCase)
+    {
+        return toHexString(array, 0, array.length, upperCase);
+    }
+
+    public static String toHexString(byte[] array, int offset, int length)
+    {
+        return toHexString(array, offset, length, true);
+    }
+
+    public static String toHexString(byte[] array, int offset, int length, boolean upperCase)
+    {
+        char[] digits = upperCase ? HEX_DIGITS : HEX_LOWER_CASE_DIGITS;
+        char[] buf = new char[length * 2];
+
+        int bufIndex = 0;
+        for (int i = offset ; i < offset + length; i++)
+        {
+            byte b = array[i];
+            buf[bufIndex++] = digits[(b >>> 4) & 0x0F];
+            buf[bufIndex++] = digits[b & 0x0F];
+        }
+
+        return new String(buf);
+    }
+
+    public static String toHexString(int i)
+    {
+        return toHexString(toByteArray(i));
     }
 }

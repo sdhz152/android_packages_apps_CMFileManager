@@ -106,7 +106,8 @@ public final class SearchHelper {
             char ch = query.charAt(i);
             if (Character.isLetterOrDigit(ch) ||
                     ch == ' ' ||
-                    ch == '\'') {
+                    ch == '\'' ||
+                    ch == '%') {
                 sb.append(ch);
             } else if (ch == '*') {
                 sb.append(".*"); //$NON-NLS-1$

@@ -69,7 +69,6 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 import android.widget.ArrayAdapter;
 
-import com.android.internal.util.XmlUtils;
 import com.cyanogenmod.filemanager.FileManagerApplication;
 import com.cyanogenmod.filemanager.R;
 import com.cyanogenmod.filemanager.activities.preferences.SettingsPreferences;
@@ -124,6 +123,7 @@ import com.cyanogenmod.filemanager.util.ExceptionUtil.OnRelaunchCommandResult;
 import com.cyanogenmod.filemanager.util.FileHelper;
 import com.cyanogenmod.filemanager.util.MimeTypeHelper.MimeTypeCategory;
 import com.cyanogenmod.filemanager.util.MountPointHelper;
+import com.cyanogenmod.filemanager.util.ParseHelper;
 import com.cyanogenmod.filemanager.util.StorageHelper;
 
 import java.io.File;
@@ -715,6 +715,8 @@ public class NavigationActivity extends Activity
         super.onConfigurationChanged(newConfig);
         onLayoutChanged();
         mDrawerToggle.onConfigurationChanged(newConfig);
+        if ((IntentsActionPolicy.mDialog != null) && IntentsActionPolicy.mDialog.isShowing())
+            IntentsActionPolicy.mDialog.refresh();
     }
 
     /**
@@ -1426,9 +1428,9 @@ public class NavigationActivity extends Activity
 
             try {
                 // Find the root element
-                XmlUtils.beginDocument(parser, TAG_BOOKMARKS);
+                ParseHelper.beginDocument(parser, TAG_BOOKMARKS);
                 while (true) {
-                    XmlUtils.nextElement(parser);
+                    ParseHelper.nextElement(parser);
                     String element = parser.getName();
                     if (element == null) {
                         break;
@@ -1498,7 +1500,7 @@ public class NavigationActivity extends Activity
             for (StorageVolume volume: volumes) {
                 if (volume != null) {
                     String mountedState = volume.getState();
-                    String path = volume.getPath();
+                    String path = StorageHelper.getPathReflect(volume);
                     if (!Environment.MEDIA_MOUNTED.equalsIgnoreCase(mountedState) &&
                             !Environment.MEDIA_MOUNTED_READ_ONLY.equalsIgnoreCase(mountedState)) {
                         Log.w(TAG, "Ignoring '" + path + "' with state of '"+ mountedState + "'");
@@ -1808,7 +1810,7 @@ public class NavigationActivity extends Activity
                 StorageVolume[] volumes =
                         StorageHelper.getStorageVolumes(this, false);
                 if (volumes != null && volumes.length > 0) {
-                    initialDir = volumes[0].getPath();
+                    initialDir = StorageHelper.getPathReflect(volumes[0]);
                     //Ensure that initial directory is an absolute directory
                     initialDir = FileHelper.getAbsPath(initialDir);
                 } else {

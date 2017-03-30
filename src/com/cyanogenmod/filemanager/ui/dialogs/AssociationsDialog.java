@@ -81,6 +81,8 @@ public class AssociationsDialog implements OnItemClickListener {
 
     private boolean mLoaded;
 
+    private ResolveInfo mInfoClicked;
+
     /**
      * Constructor of <code>AssociationsDialog</code>.
      *
@@ -139,6 +141,7 @@ public class AssociationsDialog implements OnItemClickListener {
         AssociationsAdapter adapter =
                 new AssociationsAdapter(this.mContext, this.mGrid, this.mIntents, this);
         this.mGrid.setAdapter(adapter);
+        this.mInfoClicked = mPreferred;
 
         // Ensure a default title dialog
         String dialogTitle = title;
@@ -163,16 +166,18 @@ public class AssociationsDialog implements OnItemClickListener {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ResolveInfo ri = getSelected();
+                        ResolveInfo ri = mInfoClicked;
                         Intent intent =
                                 IntentsActionPolicy.getIntentFromResolveInfo(
                                         ri, AssociationsDialog.this.mRequestIntent);
 
                         // Open the intent (and remember the action is the check is marked)
-                        onIntentSelected(
-                                ri,
-                                intent,
-                                AssociationsDialog.this.mRemember.isChecked());
+                        if (intent != null) {
+                            onIntentSelected(
+                                    ri,
+                                    intent,
+                                    AssociationsDialog.this.mRemember.isChecked());
+                        }
                     }
                 });
         this.mDialog.setButton(
@@ -181,6 +186,13 @@ public class AssociationsDialog implements OnItemClickListener {
                 (DialogInterface.OnClickListener)null);
         this.mDialog.setOnCancelListener(onCancelListener);
         this.mDialog.setOnDismissListener(onDismissListener);
+    }
+
+    public boolean isShowing() {
+        if (this.mDialog != null) {
+            return this.mDialog.isShowing();
+        }
+        return false;
     }
 
     /**
@@ -202,6 +214,38 @@ public class AssociationsDialog implements OnItemClickListener {
         });
     }
 
+    public void refresh() {
+        DialogHelper.delegateDialogShow(this.mContext, this.mDialog);
+        // Set user preferences
+        this.mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+        this.mGrid.post(new Runnable() {
+            @Override
+            public void run() {
+                refreshSelectedView();
+                AssociationsDialog.this.mGrid.postDelayed(this, 50L);
+            }
+        });
+    }
+
+    private void refreshSelectedView() {
+        if ((ViewGroup)this.mGrid.getChildAt(0) == null) return;
+        if (mInfoClicked == null) return;
+        int cc = this.mIntents.size();
+        for (int i = 0; i < cc; i++) {
+            ResolveInfo info = this.mIntents.get(i);
+            if (info.activityInfo.name.equals(mInfoClicked.activityInfo.name)) {
+                // Select the item
+                ViewGroup item = (ViewGroup)this.mGrid.getChildAt(i);
+                if (item != null) {
+                    deselectAll();
+                    ((ViewGroup)item).setSelected(true);
+                    this.mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
+                    return;
+                }
+            }
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -219,6 +263,7 @@ public class AssociationsDialog implements OnItemClickListener {
             // Enable action button
             this.mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
         }
+         mInfoClicked = getSelected();
     }
 
     /**

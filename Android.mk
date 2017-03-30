@@ -14,12 +14,10 @@
 # limitations under the License.
 #
 
-ifneq ($(TARGET_USES_AOSP),true)
-
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
+LOCAL_SRC_FILES := $(call all-java-files-under, src)
 LOCAL_SRC_FILES += $(call all-java-files-under, themes/src)
 LOCAL_SRC_FILES += $(call all-java-files-under, libs/android-syntax-highlight/src)
 LOCAL_SRC_FILES += $(call all-java-files-under, libs/color-picker-view/src)
@@ -46,5 +44,3 @@ LOCAL_PREBUILT_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_MULTI_PREBUILT)
 include $(call all-makefiles-under,$(LOCAL_PATH))
-
-endif #TARGET_USES_AOSP

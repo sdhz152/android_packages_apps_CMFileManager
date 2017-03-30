@@ -112,6 +112,8 @@ public class SearchActivity extends Activity
 
     private static boolean DEBUG = false;
 
+    private static boolean isResumed = false;
+
     /**
      * An {@link Intent} action for restore view information.
      */
@@ -440,6 +442,12 @@ public class SearchActivity extends Activity
         super.onCreate(state);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isResumed = true;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -487,6 +495,7 @@ public class SearchActivity extends Activity
         //Set out transition
         overridePendingTransition(R.anim.hold_in, R.anim.translate_to_left_out);
         super.onPause();
+        isResumed = false;
         // stop search if the activity moves out of the foreground
         if (mExecutable != null) {
             mExecutable.end();
@@ -1490,7 +1499,7 @@ public class SearchActivity extends Activity
 
         @Override
         protected void onPostExecute(List<DataHolder> results) {
-            if (!isResumed()) {
+            if (!isResumed) {
                 return;
             }
             mAdapterList.clear();

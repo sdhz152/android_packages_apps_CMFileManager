@@ -16,14 +16,14 @@
 
 package com.cyanogenmod.filemanager.util;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cyanogenmod.filemanager.commands.AsyncResultListener;

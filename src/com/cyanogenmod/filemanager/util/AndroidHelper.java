@@ -31,13 +31,13 @@ import android.os.UserManager;
 import android.util.DisplayMetrics;
 import android.view.ViewConfiguration;
 
-import com.android.internal.util.HexDump;
-
 import java.io.ByteArrayInputStream;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+
+import com.cyanogenmod.filemanager.util.StringHelper;
 
 /**
  * A helper class with useful methods for deal with android.
@@ -122,7 +122,7 @@ public final class AndroidHelper {
                     X509Certificate cert = (X509Certificate) cf.generateCertificate(
                             new ByteArrayInputStream(signatures[0].toByteArray()));
                     sha1.update(cert.getEncoded());
-                    String appHash = HexDump.toHexString(sha1.digest());
+                    String appHash = StringHelper.toHexString(sha1.digest());
 
                     // Get the signature of the system package
                     info = pm.getPackageInfo("android",
@@ -131,7 +131,7 @@ public final class AndroidHelper {
                     cert = (X509Certificate) cf.generateCertificate(
                             new ByteArrayInputStream(signatures[0].toByteArray()));
                     sha1.update(cert.getEncoded());
-                    String systemHash = HexDump.toHexString(sha1.digest());
+                    String systemHash = StringHelper.toHexString(sha1.digest());
 
                     // Is platform signed?
                     sIsAppPlatformSigned = appHash.equals(systemHash);
@@ -151,7 +151,8 @@ public final class AndroidHelper {
     }
 
     public static boolean isUserOwner() {
-        return UserHandle.myUserId() == UserHandle.USER_OWNER;
+        final int PER_USER_RANGE = 100000;
+        return (android.os.Process.myUid()/PER_USER_RANGE) == 0;
     }
 
     public static boolean isSecondaryUser(Context context) {

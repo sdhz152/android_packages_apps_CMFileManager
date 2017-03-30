@@ -18,12 +18,12 @@ package com.cyanogenmod.filemanager.commands.java;
 
 import android.util.Log;
 
-import com.android.internal.util.HexDump;
 import com.cyanogenmod.filemanager.commands.AsyncResultListener;
 import com.cyanogenmod.filemanager.commands.ChecksumExecutable;
 import com.cyanogenmod.filemanager.console.ExecutionException;
 import com.cyanogenmod.filemanager.console.InsufficientPermissionsException;
 import com.cyanogenmod.filemanager.console.NoSuchFileOrDirectory;
+import com.cyanogenmod.filemanager.util.StringHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -243,7 +243,7 @@ public class ChecksumCommand extends Program implements ChecksumExecutable {
 
             // Finally digest
             this.mChecksums[type.ordinal()] =
-                    HexDump.toHexString(md.digest()).toLowerCase(Locale.ROOT);
+                    StringHelper.toHexString(md.digest()).toLowerCase(Locale.ROOT);
             checkCancelled();
             if (this.mAsyncResultListener != null) {
                 this.mAsyncResultListener.onPartialResult(this.mChecksums[type.ordinal()]);
