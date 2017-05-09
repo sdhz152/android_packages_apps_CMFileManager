@@ -28,8 +28,11 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -588,6 +591,9 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         // Grant access to resources if needed
         grantSecureAccessIfNeeded(intent, ri);
 
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
         return intent;
     }
 
@@ -762,7 +768,12 @@ public final class IntentsActionPolicy extends ActionsPolicy {
     private static Uri getUriFromFile(Context ctx, File file) {
         Uri uri = MediaHelper.fileToContentUri(ctx, file);
         if (uri == null) {
-            uri = Uri.fromFile(file);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                uri = FileProvider.getUriForFile(ctx,
+                        "com.cyanogenmod.filemanager.fileprovider", file);
+            } else {
+                uri = Uri.fromFile(file);
+            }
         }
         return uri;
     }
