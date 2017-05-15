@@ -109,7 +109,9 @@ public class SearchResultAdapter extends ArrayAdapter<SearchActivity.DataHolder>
     private Runnable mParseNewResults = new Runnable() {
         @Override
         public void run() {
-            sort(mSearchResultComparator);
+            if (mSearchResultComparator != null) {
+                sort(mSearchResultComparator);
+            }
             if (mInStreamingMode) {
                 mHandler.postDelayed(mParseNewResults, STREAMING_MODE_REFRESH_DELAY);
             }
