@@ -16,6 +16,7 @@
 
 package com.cyanogenmod.filemanager.ui.policy;
 
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -26,6 +27,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -56,6 +60,7 @@ import com.cyanogenmod.filemanager.util.ResourcesHelper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -467,6 +472,7 @@ public final class IntentsActionPolicy extends ActionsPolicy {
         try {
             // Create the intent that will handle the shortcut
             Intent shortcutIntent = new Intent(ctx, ShortcutActivity.class);
+            shortcutIntent.setAction(Intent.ACTION_VIEW);
             shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             if (FileHelper.isDirectory(fso)) {
@@ -484,19 +490,37 @@ public final class IntentsActionPolicy extends ActionsPolicy {
                     ResourcesHelper.getIdentifier(
                             ctx.getResources(), "drawable", resid); //$NON-NLS-1$
 
-            // The intent to send to broadcast for register the shortcut intent
-            Intent intent = new Intent();
-            intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
-            intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, fso.getName());
-            intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
-                    Intent.ShortcutIconResource.fromContext(ctx, dwid));
-            intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT"); //$NON-NLS-1$
-            ctx.sendBroadcast(intent);
+            ShortcutManager shortcutManager = ctx.getSystemService(ShortcutManager.class);
 
-            // Show the confirmation
-            DialogHelper.showToast(
-                    ctx, R.string.shortcut_creation_success_msg, Toast.LENGTH_SHORT);
+            if (shortcutManager != null && shortcutManager.isRequestPinShortcutSupported()) {
+                ShortcutInfo shortcut =
+                        new ShortcutInfo.Builder(ctx, fso.getFullPath())
+                        .setShortLabel(fso.getName())
+                        .setIcon(Icon.createWithResource(ctx, dwid))
+                        .setIntent(shortcutIntent)
+                        .build();
 
+                Intent pinnedShortcutCallbackIntent =
+                        shortcutManager.createShortcutResultIntent(shortcut);
+
+                PendingIntent successCallback = PendingIntent.getBroadcast(ctx, 0,
+                        pinnedShortcutCallbackIntent, 0);
+
+                shortcutManager.requestPinShortcut(shortcut, successCallback.getIntentSender());
+            } else {
+                // The intent to send to broadcast for register the shortcut intent
+                Intent intent = new Intent();
+                intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+                intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, fso.getName());
+                intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE,
+                        Intent.ShortcutIconResource.fromContext(ctx, dwid));
+                intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT"); //$NON-NLS-1$
+                ctx.sendBroadcast(intent);
+
+                // Show the confirmation
+                DialogHelper.showToast(
+                        ctx, R.string.shortcut_creation_success_msg, Toast.LENGTH_SHORT);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to create the shortcut", e); //$NON-NLS-1$
             DialogHelper.showToast(
