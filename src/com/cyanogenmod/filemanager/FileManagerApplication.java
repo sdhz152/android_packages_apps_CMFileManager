@@ -182,7 +182,7 @@ public final class FileManagerApplication extends Application {
         // file manager
         File externalStorage = Environment.getExternalStorageDirectory();
         MimeTypeIndexService.indexFileRoot(this, externalStorage.getAbsolutePath());
-        MimeTypeIndexService.indexFileRoot(this, Environment.getRootDirectory().getAbsolutePath());
+//        MimeTypeIndexService.indexFileRoot(this, Environment.getRootDirectory().getAbsolutePath());
 
         // Schedule in case not scheduled (i.e. never booted with this app on device
         SecureCacheCleanupService.scheduleCleanup(getApplicationContext());
